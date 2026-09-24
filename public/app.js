@@ -13,8 +13,8 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeIcon = document.getElementById('theme-icon');
 const themeLabel = document.getElementById('theme-label');
 
-// Cargar tema guardado (localStorage) o usar oscuro por defecto
-let currentTheme = localStorage.getItem('hotelTheme') || 'dark';
+// Cargar tema guardado (localStorage) o usar CLARO por defecto
+let currentTheme = localStorage.getItem('hotelTheme') || 'light';
 document.body.setAttribute('data-theme', currentTheme);
 
 function updateThemeButton(theme) {
