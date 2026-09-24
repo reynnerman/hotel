@@ -70,6 +70,43 @@ body, .hud-header, .hud-main, .hud-bottom-bar, .blueprint-area,
   transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
 }
 
+/* ===== BOTÓN DE TEMA CLARO / OSCURO ===== */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-gold);
+  color: var(--text-gold);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  white-space: nowrap;
+  user-select: none;
+}
+.theme-toggle-btn:hover {
+  background: var(--border-gold);
+  color: var(--bg-dark);
+  box-shadow: 0 0 10px var(--gold-glow);
+}
+.theme-toggle-btn:active {
+  transform: scale(0.97);
+}
+.theme-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+.theme-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+/* ======================================== */
+
 /* Reset general */
 * {
   margin: 0;

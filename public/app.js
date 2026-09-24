@@ -1,3 +1,13 @@
+// =============================================
+// VERIFICAR AUTENTICACIÓN — PRIMERO QUE TODO
+// =============================================
+if (!localStorage.getItem('hotel_token')) {
+  window.location.replace('/login.html');
+  throw new Error('Sin sesión activa. Redirigiendo al login.');
+}
+const token = localStorage.getItem('hotel_token');
+const usuarioLogueado = JSON.parse(localStorage.getItem('hotel_user') || '{}');
+
 // ===== GESTIÓN DEL TEMA (OSCURO / CLARO) =====
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const themeIcon = document.getElementById('theme-icon');
@@ -6,34 +16,28 @@ const themeLabel = document.getElementById('theme-label');
 // Cargar tema guardado (localStorage) o usar oscuro por defecto
 let currentTheme = localStorage.getItem('hotelTheme') || 'dark';
 document.body.setAttribute('data-theme', currentTheme);
-updateThemeButton(currentTheme);
 
 function updateThemeButton(theme) {
   if (theme === 'dark') {
-    themeIcon.textContent = '☀';
-    themeLabel.textContent = 'MODO CLARO';
+    if (themeIcon) themeIcon.textContent = '☀';
+    if (themeLabel) themeLabel.textContent = 'MODO CLARO';
   } else {
-    themeIcon.textContent = '☽';
-    themeLabel.textContent = 'MODO OSCURO';
+    if (themeIcon) themeIcon.textContent = '☽';
+    if (themeLabel) themeLabel.textContent = 'MODO OSCURO';
   }
 }
 
-themeToggleBtn.addEventListener('click', () => {
-  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  document.body.setAttribute('data-theme', currentTheme);
-  localStorage.setItem('hotelTheme', currentTheme);
-  updateThemeButton(currentTheme);
-});
-// =============================================
+updateThemeButton(currentTheme);
 
-// =============================================
-// VERIFICAR AUTENTICACIÓN
-// =============================================
-const token = localStorage.getItem('hotel_token');
-if (!token) {
-  window.location.href = '/login.html';
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('hotelTheme', currentTheme);
+    updateThemeButton(currentTheme);
+  });
 }
-const usuarioLogueado = JSON.parse(localStorage.getItem('hotel_user') || '{}');
+// =============================================
 
 // Configurar botón de logout si existiera, o atado a la Info-Bar
 function logout() {

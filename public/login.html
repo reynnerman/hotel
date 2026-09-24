@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso al Sistema - Grand Horizon Luxury Hotel</title>
+  <title data-hotel-titulo-login>Acceso al Sistema - Grand Horizon Luxury Hotel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Configuración central del hotel -->
+  <script src="hotel.config.js"></script>
   <style>
     /* Estilos específicos para la pantalla de Login integrados para mantener estética luxury */
     body.login-body {
@@ -117,8 +119,8 @@
 <body class="login-body">
 
   <div class="login-container">
-    <div class="login-logo">GRAND HORIZON</div>
-    <div class="login-subtitle">Sistema de Gestión Operativa</div>
+    <div class="login-logo" data-hotel-nombre>GRAND HORIZON</div>
+    <div class="login-subtitle" data-hotel-subtitulo>Sistema de Gestión Operativa</div>
 
     <form class="login-form" id="loginForm">
       <div class="form-group">
