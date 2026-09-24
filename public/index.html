@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano de Habitaciones - Grand Horizon Luxury Hotel</title>
+  <!-- Google Fonts: Cinzel (Luxury Serif) & Outfit (Clean Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
+  <nav class="global-navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">GH</span>
+      <span class="nav-title">GRAND HORIZON LUXURY HOTEL</span>
+    </div>
+    <div class="nav-links" id="main-nav-links">
+      <button class="nav-item active" data-module="recepcion">RECEPCIÓN</button>
+      <button class="nav-item" data-module="limpieza">LIMPIEZA</button>
+      <button class="nav-item" data-module="mantenimiento">MANTENIMIENTO</button>
+      <button class="nav-item" data-module="seguridad">SEGURIDAD</button>
+      <button class="nav-item" data-module="administracion">ADMINISTRACIÓN</button>
+      <button class="nav-item" data-module="gerencia">GERENCIA</button>
+      <button class="nav-item" data-module="ajustes">AJUSTES</button>
+    </div>
+  </nav>
+
+  <!-- CONTENEDOR PRINCIPAL: MÓDULO RECEPCIÓN -->
+  <div class="hud-container active-module" id="module-recepcion">
+    
+    <!-- HEADER ELEGANTE -->
+    <header class="hud-header">
+      <div class="hud-title-block">
+        <span class="hud-tag">MAPA DE DISTRIBUCIÓN DE HABITACIONES</span>
+        <h1 id="floor-header-title">PLANTA PRINCIPAL - PISO 1</h1>
+      </div>
+      <div class="system-status">
+        <span class="pulse-indicator"></span>
+        <span class="status-text">MÓDULO DE RECEPCIÓN</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <!-- Filtro de Disponibilidad -->
+        <div class="availability-filter-bar" style="display: flex; gap: 5px; align-items: center; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--border-gold);">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-gold);">🔎 DISPONIBILIDAD:</span>
+          <input type="date" id="filter-date-in" class="settings-input" style="padding: 2px 5px; width: 110px;">
+          <input type="date" id="filter-date-out" class="settings-input" style="padding: 2px 5px; width: 110px;">
+          <button class="settings-btn settings-btn-primary" onclick="aplicarFiltroDisponibilidad()" style="padding: 2px 8px; font-size: 10px;">BUSCAR</button>
+          <button class="settings-btn settings-btn-ghost" onclick="limpiarFiltroDisponibilidad()" style="padding: 2px 8px; font-size: 10px;">X</button>
+        </div>
+        
+        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Cambiar tema">
+          <span class="theme-icon" id="theme-icon">☀</span>
+          <span class="theme-label" id="theme-label">MODO CLARO</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- LEYENDA LATERAL IZQUIERDA (Contraparte del selector de pisos) -->
+    <aside class="hud-legend-sidebar">
+      <div class="legend-axis"></div>
+      <div class="legend-items-list">
+        <div class="legend-item">
+          <span class="legend-box box-available"></span>
+          <span class="legend-text">Disponible</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-box box-occupied"></span>
+          <span class="legend-text">Ocupada</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-box box-dirty"></span>
+          <span class="legend-text">Limpieza</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-box box-maintenance"></span>
+          <span class="legend-text">Mantenim.</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-box box-out-of-service"></span>
+          <span class="legend-text">F. Servicio</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PLANO DE PLANTA -->
+    <main class="hud-main">
+      
+      <div class="blueprint-area">
+        <div class="blueprint-grid"></div> <!-- Grid elegante dorado tenue -->
+        
+        <div class="map-wrapper">
+          <!-- Ala Norte (Habitaciones Impares) -->
+          <div class="wing north-wing" id="north-wing">
+            <!-- Dinámico -->
+          </div>
+
+          <!-- Pasillo Central -->
+          <div class="central-corridor">
+            <span class="corridor-label">GALERÍA CENTRAL</span>
+            <div class="corridor-line"></div>
+          </div>
+
+          <!-- Ala Sur (Habitaciones Pares) -->
+          <div class="wing south-wing" id="south-wing">
+            <!-- Dinámico -->
+          </div>
+        </div>
+
+      </div>
+
+
+    </main>
+
+    <!-- SELECTOR DE PISOS LATERAL DERECHO (Estilo Minimalista Dorado) -->
+    <aside class="hud-floor-selector">
+      <div class="selector-axis"></div>
+      <div class="selector-buttons" id="floor-selector-list">
+        <button class="floor-hud-btn" data-floor="5">4°P</button>
+        <button class="floor-hud-btn" data-floor="4">3°P</button>
+        <button class="floor-hud-btn" data-floor="3">2°P</button>
+        <button class="floor-hud-btn" data-floor="2">1°P</button>
+        <button class="floor-hud-btn active" data-floor="1">PB</button>
+      </div>
+    </aside>
+
+    <!-- BARRA ESTADÍSTICAS INFERIOR -->
+    <section class="hud-bottom-bar">
+      <div class="panel-stat">
+        <span class="stat-title">Habitaciones Totales</span>
+        <span class="stat-number">50</span>
+      </div>
+      <div class="panel-stat">
+        <span class="stat-title">Disponibles</span>
+        <span class="stat-number color-available" id="hud-stat-available">0</span>
+      </div>
+      <div class="panel-stat">
+        <span class="stat-title">Ocupadas</span>
+        <span class="stat-number color-occupied" id="hud-stat-occupied">0</span>
+      </div>
+      <div class="panel-stat">
+        <span class="stat-title">Limpieza</span>
+        <span class="stat-number color-dirty" id="hud-stat-dirty">0</span>
+      </div>
+      <div class="panel-stat">
+        <span class="stat-title">Mantenimiento</span>
+        <span class="stat-number color-maintenance" id="hud-stat-maintenance">0</span>
+      </div>
+      <div class="panel-stat">
+        <span class="stat-title">Fuera de Servicio</span>
+        <span class="stat-number color-out-of-service" id="hud-stat-out-of-service">0</span>
+      </div>
+    </section>
+
+    <!-- INFO BAR (Footer) -->
+    <footer class="system-info-bar">
+      <div class="info-item"><span class="info-icon">👤</span> <span class="info-text">RECEPCIÓN 01</span></div>
+      <div class="info-item"><span class="info-icon">📅</span> <span class="info-text" id="info-date">--</span></div>
+      <div class="info-item"><span class="info-icon">⏱</span> <span class="info-text" id="info-time">--:--:--</span></div>
+      <div class="info-item"><span class="info-icon">💶</span> <span class="info-text" id="info-rate-eur">EUR BCV: --</span></div>
+      <div class="info-item"><span class="info-icon">💵</span> <span class="info-text" id="info-rate-usd">USD BCV: --</span></div>
+    </footer>
+
+  </div> <!-- FIN MÓDULO RECEPCIÓN -->
+
+  <!-- MÓDULO AJUSTES -->
+  <div class="settings-module" id="module-ajustes" style="display: none;">
+
+    <!-- Header -->
+    <div class="settings-header">
+      <div class="settings-header-left">
+        <span class="settings-tag">PANEL DE CONFIGURACIÓN</span>
+        <h1 class="settings-title">AJUSTES DEL SISTEMA</h1>
+      </div>
+      <div class="system-status">
+        <span class="pulse-indicator"></span>
+        <span class="status-text">MÓDULO DE AJUSTES</span>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="pisos">🏨 PISOS &amp; HABITACIONES</button>
+      <button class="settings-tab" data-tab="usuarios">👥 USUARIOS</button>
+      <button class="settings-tab" data-tab="permisos">🔐 ROLES Y PERMISOS</button>
+    </div>
+
+    <!-- Tab: Pisos y Habitaciones -->
+    <div class="settings-tab-content active" id="tab-pisos">
+
+      <div class="settings-two-col">
+
+        <!-- Columna izquierda: Lista de pisos -->
+        <div class="settings-panel">
+          <div class="settings-panel-header">
+            <h2 class="settings-panel-title">PISOS DEL HOTEL</h2>
+            <span class="settings-panel-subtitle" id="ajustes-total-pisos">Cargando...</span>
+          </div>
+
+          <div class="settings-floors-list" id="ajustes-floors-list">
+            <!-- Renderizado desde JS -->
+          </div>
+
+          <!-- Crear nuevo piso -->
+          <div class="settings-create-floor">
+            <h3 class="settings-subpanel-title">AGREGAR NUEVO PISO</h3>
+            <form id="form-nuevo-piso">
+              <div class="settings-form-row">
+                <div class="settings-form-group">
+                  <label class="settings-label">Número de Piso</label>
+                  <input type="number" id="nuevo-piso-num" class="settings-input" min="1" max="99" placeholder="Ej. 6" required>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Cant. Habitaciones a Generar</label>
+                  <input type="number" id="nuevo-piso-cant" class="settings-input" min="1" max="50" value="10" required>
+                </div>
+              </div>
+              <div class="settings-form-row">
+                <div class="settings-form-group">
+                  <label class="settings-label">Inicio del Número de Habitación</label>
+                  <input type="text" id="nuevo-piso-inicio" class="settings-input" placeholder="Ej. 101" value="" required>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Tipo de Habitación por Defecto</label>
+                  <select id="nuevo-piso-tipo" class="settings-input">
+                    <option value="Sencilla">Sencilla</option>
+                    <option value="Doble" selected>Doble</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Deluxe">Deluxe</option>
+                  </select>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Precio Noche ($)</label>
+                  <input type="number" id="nuevo-piso-precio" class="settings-input" min="1" step="0.01" value="50.00" required>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button type="submit" class="settings-btn settings-btn-primary" id="btn-crear-piso">+ CREAR PISO</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Habitaciones del piso seleccionado -->
+        <div class="settings-panel">
+          <div class="settings-panel-header">
+            <h2 class="settings-panel-title" id="ajustes-hab-panel-title">SELECCIONA UN PISO</h2>
+            <span class="settings-panel-subtitle" id="ajustes-hab-count"></span>
+          </div>
+
+          <div class="settings-rooms-grid" id="ajustes-rooms-grid">
+            <div class="settings-empty-state" id="ajustes-empty-state">
+              <span class="settings-empty-icon">🏨</span>
+              <p>Haz clic en un piso para ver sus habitaciones.</p>
+            </div>
+          </div>
+
+          <!-- Agregar habitación individual -->
+          <div class="settings-create-room" id="settings-create-room-panel" style="display:none;">
+            <h3 class="settings-subpanel-title">AGREGAR HABITACIÓN</h3>
+            <form id="form-nueva-habitacion">
+              <div class="settings-form-row">
+                <div class="settings-form-group">
+                  <label class="settings-label">Número</label>
+                  <input type="text" id="nueva-hab-numero" class="settings-input" placeholder="Ej. 112" required>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Tipo</label>
+                  <select id="nueva-hab-tipo" class="settings-input">
+                    <option value="Sencilla">Sencilla</option>
+                    <option value="Doble" selected>Doble</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Deluxe">Deluxe</option>
+                  </select>
+                </div>
+                <div class="settings-form-group">
+                  <label class="settings-label">Precio ($)</label>
+                  <input type="number" id="nueva-hab-precio" class="settings-input" min="1" step="0.01" value="50.00" required>
+                </div>
+                <div style="display:flex; align-items:flex-end;">
+                  <button type="submit" class="settings-btn settings-btn-primary">+ AGREGAR</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tab: Usuarios -->
+    <div class="settings-tab-content" id="tab-usuarios">
+      <div class="settings-two-col">
+
+        <!-- Formulario nuevo usuario -->
+        <div class="settings-panel">
+          <div class="settings-panel-header">
+            <h2 class="settings-panel-title">REGISTRAR USUARIO</h2>
+          </div>
+          <form id="settings-new-user-form">
+            <div class="settings-form-row">
+              <div class="settings-form-group">
+                <label class="settings-label">Cédula</label>
+                <input type="text" id="snu-cedula" class="settings-input" required placeholder="V12345678">
+              </div>
+              <div class="settings-form-group">
+                <label class="settings-label">Usuario</label>
+                <input type="text" id="snu-usuario" class="settings-input" required placeholder="nombre_usuario">
+              </div>
+            </div>
+            <div class="settings-form-row">
+              <div class="settings-form-group">
+                <label class="settings-label">Nombre</label>
+                <input type="text" id="snu-nombre" class="settings-input" required>
+              </div>
+              <div class="settings-form-group">
+                <label class="settings-label">Apellido</label>
+                <input type="text" id="snu-apellido" class="settings-input" required>
+              </div>
+            </div>
+            <div class="settings-form-row">
+              <div class="settings-form-group">
+                <label class="settings-label">Contraseña</label>
+                <input type="password" id="snu-password" class="settings-input" required>
+              </div>
+              <div class="settings-form-group">
+                <label class="settings-label">Rol</label>
+                <select id="snu-rol" class="settings-input">
+                  <option value="1">Gerencia</option>
+                  <option value="2">Recepción</option>
+                  <option value="3">Administración</option>
+                  <option value="4">Seguridad</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+              <button type="submit" class="settings-btn settings-btn-primary">CREAR USUARIO</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lista de usuarios -->
+        <div class="settings-panel">
+          <div class="settings-panel-header">
+            <h2 class="settings-panel-title">USUARIOS REGISTRADOS</h2>
+            <button class="settings-btn settings-btn-ghost" id="btn-reload-users">↻ RECARGAR</button>
+          </div>
+          <div class="settings-users-table-wrap">
+            <table class="settings-users-table">
+              <thead>
+                <tr>
+                  <th>Cédula</th>
+                  <th>Usuario</th>
+                  <th>Nombre</th>
+                  <th>Rol</th>
+                </tr>
+              </thead>
+              <tbody id="settings-users-tbody">
+                <!-- Renderizado desde JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tab: Permisos -->
+    <div class="settings-tab-content" id="tab-permisos">
+      <div class="settings-panel" style="margin: 20px 28px; flex: 1;">
+        <div class="settings-panel-header">
+          <h2 class="settings-panel-title">GESTIÓN DE ACCESOS Y PERMISOS</h2>
+          <span class="settings-panel-subtitle">Habilita o deshabilita funciones del sistema para cada rol</span>
+        </div>
+        <div class="settings-roles-grid" id="settings-roles-grid" style="padding: 20px; overflow-y: auto; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+          <!-- Renderizado desde JS -->
+          <div class="settings-empty-state"><span class="settings-empty-icon">🔐</span><p>Cargando roles...</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- FIN MÓDULO AJUSTES -->
+
+  <!-- CONTENEDOR PLACEHOLDER PARA OTROS MÓDULOS -->
+  <div class="generic-module-container" id="module-placeholder" style="display: none;">
+    <div class="placeholder-content">
+      <div class="placeholder-icon">🛠</div>
+      <h2 id="placeholder-title">Módulo en Desarrollo</h2>
+      <p>Esta sección se encuentra en etapa de construcción y planificación.</p>
+      <div id="settings-actions" style="display: none; margin-top: 30px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GESTIÓN TIPO TARJETA DE REGISTRO BOUTIQUE -->
+  <div class="modal-overlay" id="room-modal">
+    <div class="modal-card">
+      
+      <div class="terminal-header-decor">
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-title-decor">FICHA DE CONTROL</span>
+      </div>
+
+      <header class="modal-header">
+        <div class="modal-title-wrap">
+          <h3 id="modal-room-title">HABITACIÓN 101</h3>
+          <span class="modal-room-type" id="modal-room-type">CATEGORÍA: SUITE DELUXE</span>
+        </div>
+        <button class="close-btn" id="close-modal-btn">CERRAR</button>
+      </header>
+      
+      <div class="modal-body">
+        <div class="current-status-banner" id="modal-current-status-banner">
+          Estado Actual: <strong id="modal-current-status-text">Disponible</strong>
+        </div>
+
+        <!-- MODO VISTA -->
+        <div id="modal-view-mode">
+          <div id="modal-view-details" class="view-details-container"></div>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="action-btn" id="btn-edit-mode" style="flex:1;">MODIFICAR DATOS</button>
+            <button type="button" class="action-btn" id="btn-change-room" style="flex:1; display:none; background:var(--border-gold); color:#000;">CAMBIAR DE HABITACIÓN</button>
+          </div>
+          
+          <!-- SUB-PANEL CAMBIO HABITACION -->
+          <div id="modal-change-room-panel" style="display:none; margin-top: 15px; padding: 15px; border: 1px dashed var(--border-gold); border-radius: 4px;">
+            <h4 style="margin-top:0; color:var(--text-gold); font-size:12px;">TRASLADAR HUÉSPED A OTRA HABITACIÓN</h4>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label">Habitación Destino (Disponible)</label>
+              <select id="change-room-dest" class="date-input" style="width:100%;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label">Motivo del Cambio</label>
+              <input type="text" id="change-room-reason" class="date-input" style="width:100%;" placeholder="Ej: Aire acondicionado averiado">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+              <button type="button" class="cancel-btn" id="btn-cancel-change-room">CANCELAR</button>
+              <button type="button" class="save-btn" id="btn-confirm-change-room">CONFIRMAR CAMBIO</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODO EDICIÓN -->
+        <div id="modal-edit-mode" style="display: none;">
+        <form id="status-form">
+          <label class="form-label">Asignar Nuevo Estado</label>
+          <div class="status-selector-grid">
+            
+            <label class="status-option-card opt-available">
+              <input type="radio" name="roomStatus" value="DISPONIBLE">
+              <div class="option-content">
+                <span class="indicator-dot"></span>
+                <span class="option-label">Disponible</span>
+              </div>
+            </label>
+
+            <label class="status-option-card opt-occupied">
+              <input type="radio" name="roomStatus" value="OCUPADA">
+              <div class="option-content">
+                <span class="indicator-dot"></span>
+                <span class="option-label">Ocupada</span>
+              </div>
+            </label>
+
+            <label class="status-option-card opt-dirty">
+              <input type="radio" name="roomStatus" value="LIMPIEZA">
+              <div class="option-content">
+                <span class="indicator-dot"></span>
+                <span class="option-label">Limpieza</span>
+              </div>
+            </label>
+
+            <label class="status-option-card opt-maintenance">
+              <input type="radio" name="roomStatus" value="MANTENIMIENTO">
+              <div class="option-content">
+                <span class="indicator-dot"></span>
+                <span class="option-label">Mantenimiento</span>
+              </div>
+            </label>
+
+            <label class="status-option-card opt-out-of-service">
+              <input type="radio" name="roomStatus" value="FUERA_DE_SERVICIO">
+              <div class="option-content">
+                <span class="indicator-dot"></span>
+                <span class="option-label">Fuera de Servicio</span>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- BLOQUE DE FECHAS (solo visible cuando se selecciona OCUPADA) -->
+          <div class="date-range-block" id="date-range-block">
+            <div class="date-range-header">
+              <span class="date-range-icon">📅</span>
+              <span class="date-range-title">DATOS DE OCUPACIÓN Y HUÉSPEDES</span>
+            </div>
+            
+            <div class="guest-info-fields" style="margin: 10px 0;">
+              <div class="form-group" style="margin-bottom: 10px;">
+                <label for="room-client" class="form-label" style="font-size: 10px;">Titular de la Habitación (Nombre y Cédula)</label>
+                <input type="text" id="room-client" class="date-input" style="width: 100%; box-sizing: border-box;" placeholder="Ej. Juan Pérez - V12345678">
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1; margin-bottom: 10px;">
+                  <label for="room-persons" class="form-label" style="font-size: 10px;">Cant. Personas</label>
+                  <input type="number" id="room-persons" class="date-input" style="width: 100%; box-sizing: border-box;" min="1" value="1">
+                </div>
+                <div class="form-group" style="flex: 2; margin-bottom: 10px;">
+                  <label for="room-companions" class="form-label" style="font-size: 10px;">Acompañantes</label>
+                  <input type="text" id="room-companions" class="date-input" style="width: 100%; box-sizing: border-box;" placeholder="Ej. María López, etc.">
+                </div>
+              </div>
+            </div>
+
+            <div class="date-range-fields">
+              <div class="date-field-group">
+                <label for="room-checkin" class="date-field-label">CHECK-IN</label>
+                <input type="date" id="room-checkin" class="date-input">
+              </div>
+              <div class="date-range-separator">→</div>
+              <div class="date-field-group">
+                <label for="room-checkout" class="date-field-label">CHECK-OUT</label>
+                <input type="date" id="room-checkout" class="date-input">
+              </div>
+            </div>
+            <div class="date-duration-display" id="date-duration-display"></div>
+            
+            <!-- BLOQUE DE PAGO -->
+            <div class="payment-block" id="payment-block" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(197, 168, 128, 0.2);">
+              <div class="date-range-header">
+                <span class="date-range-icon">💳</span>
+                <span class="date-range-title">DATOS DE FACTURACIÓN Y PAGO</span>
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <div class="form-group" style="flex: 1;">
+                  <label for="room-payment-method" class="form-label" style="font-size: 10px;">Método de Pago</label>
+                  <select id="room-payment-method" class="date-input" style="width: 100%;">
+                    <option value="">Seleccione</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Pago Movil">Pago Móvil</option>
+                    <option value="Zelle">Zelle</option>
+                  </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label for="room-payment-date" class="form-label" style="font-size: 10px;">Fecha de Pago</label>
+                  <input type="date" id="room-payment-date" class="date-input" style="width: 100%;">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                  <label for="room-payment-ref" class="form-label" style="font-size: 10px;">Comprobante / Ref</label>
+                  <input type="text" id="room-payment-ref" class="date-input" style="width: 100%;" placeholder="Nro de Operación">
+                </div>
+              </div>
+              <div id="room-price-display" style="margin-top: 10px; text-align: right; font-family: var(--font-mono); color: var(--text-gold); font-size: 14px;"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="room-notes" class="form-label">Bitácora / Observaciones Internas</label>
+            <textarea id="room-notes" placeholder="Añadir comentarios relevantes para recepción y limpieza..." rows="3"></textarea>
+          </div>
+          
+          <div class="form-actions-row">
+            <button type="button" class="cancel-btn" id="btn-cancel-edit">CANCELAR</button>
+            <button type="submit" class="save-btn">GUARDAR CAMBIOS</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GESTIÓN DE USUARIOS -->
+  <div class="modal-overlay" id="users-modal">
+    <div class="modal-card" style="max-width: 600px;">
+      
+      <div class="terminal-header-decor">
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-decor-dot"></span>
+        <span class="terminal-title-decor">PANEL DE USUARIOS</span>
+      </div>
+
+      <div class="modal-header">
+        <div class="room-identity">
+          <h2 class="modal-room-title">ADMINISTRACIÓN DE PERSONAL</h2>
+          <div class="modal-room-type">ROLES Y ACCESOS</div>
+        </div>
+        <button class="close-modal" id="close-users-modal-btn">×</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- FORMULARIO NUEVO USUARIO -->
+        <div style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border-gold);">
+          <h3 style="font-family: var(--font-serif); color: var(--text-gold); font-size: 14px; margin-bottom: 10px;">REGISTRAR NUEVO USUARIO</h3>
+          <form id="new-user-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Cédula</label>
+              <input type="text" id="nu-cedula" class="date-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Usuario</label>
+              <input type="text" id="nu-usuario" class="date-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Nombre</label>
+              <input type="text" id="nu-nombre" class="date-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Apellido</label>
+              <input type="text" id="nu-apellido" class="date-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Contraseña</label>
+              <input type="password" id="nu-password" class="date-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 10px;">Rol / Departamento</label>
+              <select id="nu-rol" class="date-input" style="width: 100%; box-sizing: border-box;">
+                <option value="1">Gerencia</option>
+                <option value="2">Recepción</option>
+                <option value="3">Administración</option>
+                <option value="4">Seguridad</option>
+              </select>
+            </div>
+            <div style="grid-column: span 2; display: flex; justify-content: flex-end;">
+              <button type="submit" class="save-btn" style="padding: 10px 20px;">CREAR USUARIO</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- LISTA DE USUARIOS -->
+        <h3 style="font-family: var(--font-serif); color: var(--text-gold); font-size: 14px; margin-bottom: 10px;">USUARIOS REGISTRADOS</h3>
+        <div style="max-height: 200px; overflow-y: auto; color: var(--text-main); font-family: var(--font-sans); font-size: 12px;">
+          <table style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-gold); color: var(--text-gold);">
+                <th style="padding: 5px;">Cédula</th>
+                <th style="padding: 5px;">Usuario</th>
+                <th style="padding: 5px;">Nombre</th>
+                <th style="padding: 5px;">Rol</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body">
+              <!-- Renderizado desde JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
