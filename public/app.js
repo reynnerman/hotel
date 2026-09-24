@@ -1129,7 +1129,6 @@ async function manejarCrearHabitacion(e) {
   } catch (error) {
     mostrarToast('❌ Error de conexión.', 'error');
   }
-  }
 }
 
 async function editarPrecioHabitacion(id, precioActual) {
@@ -1370,3 +1369,40 @@ async function guardarPermisosRol(rolId, rolNombre) {
     mostrarToast('❌ Error de conexión.', 'error');
   }
 }
+
+// ====================================================
+//  EFECTO RIPPLE — ONDAS DORADAS AL HACER CLICK
+//  Usa event delegation para capturar botones dinámicos
+// ====================================================
+(function initRipple() {
+  const RIPPLE_SELECTORS = [
+    '.nav-item', '.floor-hud-btn', '.theme-toggle-btn',
+    '.close-btn', '.save-btn', '.action-btn', '.cancel-btn',
+    '.settings-btn', '.settings-tab', '.settings-floor-delete-btn',
+    '.settings-room-chip-del', '.room-hud-card', '.login-btn'
+  ].join(', ');
+
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest(RIPPLE_SELECTORS);
+    if (!btn) return;
+
+    // Eliminar ripple anterior si existe
+    const old = btn.querySelector('.ripple-wave');
+    if (old) old.remove();
+
+    const rect   = btn.getBoundingClientRect();
+    const size   = Math.max(btn.offsetWidth, btn.offsetHeight);
+    const x      = e.clientX - rect.left - size / 2;
+    const y      = e.clientY - rect.top  - size / 2;
+
+    const wave   = document.createElement('span');
+    wave.classList.add('ripple-wave');
+    wave.style.width  = wave.style.height = `${size}px`;
+    wave.style.left   = `${x}px`;
+    wave.style.top    = `${y}px`;
+
+    btn.appendChild(wave);
+    wave.addEventListener('animationend', () => wave.remove(), { once: true });
+  });
+})();
+// ====================================================

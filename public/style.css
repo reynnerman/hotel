@@ -70,42 +70,6 @@ body, .hud-header, .hud-main, .hud-bottom-bar, .blueprint-area,
   transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
 }
 
-/* ===== BOTÓN DE TEMA CLARO / OSCURO ===== */
-.theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: transparent;
-  border: 1px solid var(--border-gold);
-  color: var(--text-gold);
-  font-family: var(--font-sans);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  padding: 5px 12px;
-  cursor: pointer;
-  border-radius: 3px;
-  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
-  white-space: nowrap;
-  user-select: none;
-}
-.theme-toggle-btn:hover {
-  background: var(--border-gold);
-  color: var(--bg-dark);
-  box-shadow: 0 0 10px var(--gold-glow);
-}
-.theme-toggle-btn:active {
-  transform: scale(0.97);
-}
-.theme-icon {
-  font-size: 14px;
-  line-height: 1;
-}
-.theme-label {
-  font-size: 10px;
-  letter-spacing: 1.5px;
-}
-/* ======================================== */
 
 /* Reset general */
 * {
@@ -311,7 +275,7 @@ body {
 
 /* Botón de Toggle de Tema */
 .theme-toggle-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: transparent;
@@ -321,20 +285,35 @@ body {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 1.5px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: background 0.25s, color 0.25s, transform 0.15s, box-shadow 0.25s;
   margin-left: 16px;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  user-select: none;
 }
 
 .theme-toggle-btn:hover {
   background-color: var(--border-gold);
   color: var(--bg-dark);
+  box-shadow: 0 0 14px var(--gold-glow);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.94);
+  box-shadow: none;
 }
 
 .theme-icon {
   font-size: 14px;
   line-height: 1;
+  transition: transform 0.3s;
+}
+
+.theme-toggle-btn:active .theme-icon {
+  transform: rotate(30deg) scale(1.2);
 }
 
 /* LEYENDA LATERAL IZQUIERDA */
@@ -2005,4 +1984,96 @@ textarea:focus {
 .settings-input:focus {
   outline: none;
   border-color: var(--border-gold);
+}
+
+/* ====================================================
+   ANIMACIONES DE CLICK — ESTADO :ACTIVE EN BOTONES
+   ==================================================== */
+
+/* Navbar */
+.nav-item:active {
+  opacity: 0.7;
+  transform: scaleY(0.96);
+}
+
+/* Selector de pisos */
+.floor-hud-btn:active {
+  transform: scale(0.88) !important;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.4) !important;
+}
+
+/* Botones de configuración */
+.settings-btn:active {
+  transform: scale(0.93) !important;
+  box-shadow: none !important;
+}
+.settings-tab:active {
+  opacity: 0.6;
+}
+.settings-floor-card:active {
+  transform: scale(0.985);
+}
+.settings-floor-delete-btn:active {
+  transform: scale(0.82);
+}
+.settings-room-chip-del:active {
+  transform: scale(0.80);
+}
+
+/* Modal */
+.close-btn:active {
+  transform: scale(0.92);
+}
+.action-btn:active {
+  transform: scale(0.96) !important;
+  box-shadow: none !important;
+}
+.cancel-btn:active {
+  transform: scale(0.96);
+}
+.save-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* Tarjetas de habitación */
+.room-hud-card:active {
+  transform: translateY(1px) scale(0.97) !important;
+  box-shadow: 0 1px 4px var(--gold-glow) !important;
+  transition: transform 0.08s, box-shadow 0.08s !important;
+}
+
+/* ====================================================
+   EFECTO RIPPLE (ondas doradas al hacer click)
+   ==================================================== */
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(197, 168, 128, 0.35);
+  transform: scale(0);
+  animation: ripple-expand 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+@keyframes ripple-expand {
+  0%   { transform: scale(0); opacity: 0.7; }
+  80%  { transform: scale(3.5); opacity: 0.15; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Asegurar que todos los botones pueden contener el ripple */
+.nav-item,
+.floor-hud-btn,
+.theme-toggle-btn,
+.close-btn,
+.save-btn,
+.action-btn,
+.cancel-btn,
+.settings-btn,
+.settings-tab,
+.settings-floor-delete-btn,
+.settings-room-chip-del,
+.room-hud-card {
+  position: relative;
+  overflow: hidden;
 }
