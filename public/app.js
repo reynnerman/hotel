@@ -154,12 +154,15 @@ function configurarNavegacionPrincipal() {
   
   // Definir accesos a módulos por rol (en base de datos esto podría venir dinámico también)
   const accesosPorRol = {
-    'GERENCIA': ['recepcion', 'limpieza', 'mantenimiento', 'seguridad', 'administracion', 'gerencia', 'ajustes'],
+    'SUPERADMIN': ['recepcion', 'limpieza', 'mantenimiento', 'seguridad', 'administracion', 'contabilidad', 'marketing', 'gerencia', 'ajustes'],
+    'GERENCIA': ['recepcion', 'limpieza', 'mantenimiento', 'seguridad', 'administracion', 'contabilidad', 'marketing', 'gerencia', 'ajustes'],
+    'ADMINISTRADOR': ['recepcion', 'administracion', 'ajustes'],
+    'CONTADOR': ['recepcion', 'contabilidad'],
     'RECEPCION': ['recepcion'],
-    'ADMINISTRACION': ['recepcion', 'administracion', 'ajustes'],
-    'SEGURIDAD': ['recepcion', 'seguridad'],
+    'MANTENIMIENTO': ['recepcion', 'mantenimiento'],
     'LIMPIEZA': ['recepcion', 'limpieza'],
-    'MANTENIMIENTO': ['recepcion', 'mantenimiento']
+    'SEGURIDAD': ['recepcion', 'seguridad'],
+    'MARKETING': ['recepcion', 'marketing']
   };
 
   const modulosPermitidos = accesosPorRol[rol] || ['recepcion'];
