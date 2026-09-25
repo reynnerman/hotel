@@ -2077,3 +2077,214 @@ textarea:focus {
   position: relative;
   overflow: hidden;
 }
+
+/* Tabs as Cards Grid (Override) */
+.settings-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 20px !important;
+  padding: 30px !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2) !important;
+}
+
+.settings-tab {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(212, 175, 55, 0.3) !important;
+  border-radius: 12px !important;
+  color: var(--text-muted) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  padding: 40px 20px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+
+.settings-tab:hover {
+  color: var(--text-gold) !important;
+  background: rgba(212, 175, 55, 0.1) !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
+  border-color: var(--border-gold) !important;
+}
+
+.settings-tab.active {
+  color: var(--bg-dark) !important;
+  background: var(--text-gold) !important;
+  border-color: var(--border-gold) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4) !important;
+}
+
+/* =========================================
+   COMPREHENSIVE RESPONSIVE DESIGN (MOBILE & TABLET)
+   ========================================= */
+
+@media screen and (max-width: 1200px) {
+  /* Allow more cards per row on slightly smaller screens */
+  .users-cards-grid, .settings-roles-grid, .settings-tabs {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  /* Make 2 columns into 1 column */
+  .settings-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+  
+  .hud-bottom-bar {
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+    justify-content: center !important;
+  }
+  
+  .panel-stat {
+    min-width: 100px;
+    margin-bottom: 10px;
+  }
+  
+  .global-navbar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    padding: 10px !important;
+  }
+  
+  .nav-links {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    margin-top: 10px !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* Modals */
+  .modal-card {
+    width: 95% !important;
+    margin: 10px !important;
+  }
+  
+  /* Forms */
+  .settings-form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .settings-form-group {
+    width: 100% !important;
+  }
+  
+  /* Tabs as Cards */
+  .settings-tabs {
+    grid-template-columns: 1fr !important;
+    padding: 15px !important;
+  }
+  
+  .settings-tab {
+    padding: 20px 15px !important;
+    min-height: 80px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Users and Roles Grids */
+  .users-cards-grid, .settings-roles-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Header adjustments */
+  .hud-header, .settings-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 15px !important;
+  }
+  
+  .hud-title-block, .settings-header-left {
+    margin-bottom: 10px;
+  }
+  
+  .system-info-bar {
+    flex-wrap: wrap !important;
+    height: auto !important;
+    padding: 10px !important;
+    gap: 10px !important;
+    justify-content: center !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* Smaller phones */
+  body, html {
+    font-size: 14px !important;
+  }
+  
+  .nav-brand {
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+  
+  .nav-item {
+    font-size: 10px !important;
+    padding: 10px !important;
+  }
+  
+  #floor-header-title {
+    font-size: 18px !important;
+  }
+  
+  .settings-panel-title {
+    font-size: 16px !important;
+  }
+}
+
+/* =========================================
+   FIXED PROPORTIONS FOR PANELS
+   ========================================= */
+.settings-two-col {
+  grid-template-columns: 350px 1fr !important;
+  gap: 30px !important;
+  overflow-y: auto !important;
+  align-items: stretch !important;
+}
+
+.settings-panel {
+  overflow-y: visible !important;
+}
+
+.users-cards-grid, .settings-roles-grid {
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
+/* =========================================
+   PERFECT FIT FIX & NAVBAR SCROLL
+   ========================================= */
+.hud-container, .settings-module, .generic-module-container {
+  height: calc(100vh - 60px) !important; /* Subtract navbar height */
+  min-height: 0 !important;
+}
+
+/* Evitar que los enlaces del navbar se aplasten */
+.nav-links {
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  /* Ocultar barra de scroll en Webkit (Chrome/Edge) para que luzca limpio */
+}
+.nav-links::-webkit-scrollbar {
+  display: none;
+}
+.nav-item {
+  flex-shrink: 0 !important; /* Mantiene su tamaño real */
+}
+
+

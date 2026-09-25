@@ -1,9 +1,9 @@
 require('dotenv').config();
 const { getDb } = require('./database.js');
-const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return bcrypt.hashSync(password, 10);
 }
 
 async function seedUsers() {
@@ -28,7 +28,7 @@ async function seedUsers() {
       await db.run(
         `INSERT INTO usuarios (cedula, usuario, nombre, apellido, password, rol_id)
          VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (usuario) DO UPDATE SET rol_id = EXCLUDED.rol_id`,
+         ON CONFLICT (usuario) DO UPDATE SET rol_id = EXCLUDED.rol_id, password = EXCLUDED.password`,
         [u.cedula, u.usuario, u.nombre, u.apellido, hashed, u.rol_id]
       );
     }

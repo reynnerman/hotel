@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=11">
   <!-- Configuración central del hotel: cambia el nombre aquí y se actualiza en toda la app -->
   <script src="hotel.config.js"></script>
 </head>
@@ -173,30 +173,90 @@
   <!-- MÓDULO AJUSTES -->
   <div class="settings-module" id="module-ajustes" style="display: none;">
 
-    <!-- Header -->
-    <div class="settings-header">
-      <div class="settings-header-left">
-        <span class="settings-tag">PANEL DE CONFIGURACIÓN</span>
-        <h1 class="settings-title">AJUSTES DEL SISTEMA</h1>
+    <!-- VISTA DASHBOARD PRINCIPAL DE AJUSTES -->
+    <div id="settings-dashboard-view" style="padding: 20px 40px;">
+      <div class="settings-header" style="border-bottom: none; padding-bottom: 0;">
+        <div class="settings-header-left">
+          <h1 class="settings-title" style="font-size: 32px; font-weight: 700;">Ajustes del Sistema</h1>
+          <span style="color: var(--text-muted); font-size: 14px; display: block; margin-top: 5px;">Selecciona el módulo que deseas administrar.</span>
+        </div>
       </div>
-      <div class="system-status">
-        <span class="pulse-indicator"></span>
-        <span class="status-text">MÓDULO DE AJUSTES</span>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px;">
+        <!-- Card Usuarios -->
+        <div class="settings-module-card" onclick="openSettingsDetail('usuarios')">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(255,255,255,0.1);">👥</div>
+            <h3 style="color: var(--text-active); font-size: 18px; font-weight: 600; font-family: var(--font-sans);">Usuarios del Sistema</h3>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 25px; min-height: 80px;">Administración de cuentas y roles de acceso. Permite configurar credenciales y gestionar los permisos asignados a cada perfil.</p>
+          <div style="text-align: right; color: var(--text-muted); font-size: 13px;">Administrar &rarr;</div>
+        </div>
+        
+        <!-- Card Pisos -->
+        <div class="settings-module-card" onclick="openSettingsDetail('pisos')">
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+            <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 1px solid rgba(255,255,255,0.1);">🏨</div>
+            <h3 style="color: var(--text-active); font-size: 18px; font-weight: 600; font-family: var(--font-sans);">Pisos y Habitaciones</h3>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 25px; min-height: 80px;">Registro, configuración y alta de pisos y habitaciones en la plataforma. Define tipos, precios y ubicaciones.</p>
+          <div style="text-align: right; color: var(--text-muted); font-size: 13px;">Administrar &rarr;</div>
+        </div>
       </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="settings-tabs">
-      <button class="settings-tab active" data-tab="pisos">🏨 PISOS &amp; HABITACIONES</button>
-      <button class="settings-tab" data-tab="usuarios">👥 USUARIOS</button>
-      <button class="settings-tab" data-tab="permisos">🔐 ROLES Y PERMISOS</button>
+    <!-- VISTA DETALLE: USUARIOS -->
+    <div id="settings-detail-usuarios" style="display: none; padding: 20px 40px;">
+      <div style="margin-bottom: 20px;">
+        <span style="color: var(--text-muted); font-size: 13px; cursor: pointer;" onclick="closeSettingsDetail()">Ajustes</span> <span style="color: var(--text-muted);">/</span> 
+        <strong style="color: var(--text-active); font-size: 13px;">Gestión de Usuarios</strong>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+        <div>
+          <h1 class="settings-title" style="font-size: 28px; font-weight: 700; margin-bottom: 5px;">Gestión de Usuarios</h1>
+          <span style="color: var(--text-muted); font-size: 14px;">Administra cuentas de acceso, roles y estados de aprobación.</span>
+        </div>
+        <button onclick="document.getElementById('modal-nuevo-usuario').style.display='flex';" style="background-color: #5544ff; color: white; border: none; border-radius: 8px; padding: 12px 24px; font-family: var(--font-sans); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">+ Agregar Usuario</button>
+      </div>
+
+      <div class="settings-panel" style="padding: 25px; border-radius: 12px;">
+        <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+          <input type="text" class="settings-input" placeholder="Buscar por nombre o correo..." style="flex: 1; max-width: 300px; border-radius: 8px; padding: 10px 15px;">
+          <select class="settings-input" style="border-radius: 8px; padding: 10px 15px; width: auto;"><option>Todos los Roles</option></select>
+          <select class="settings-input" style="border-radius: 8px; padding: 10px 15px; width: auto;"><option>Todos los Estados</option></select>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-sans);">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+              <th style="padding: 15px 10px; font-weight: 600;">USUARIO</th>
+              <th style="padding: 15px 10px; font-weight: 600;">ROL</th>
+              <th style="padding: 15px 10px; font-weight: 600;">ESTADO</th>
+              <th style="padding: 15px 10px; font-weight: 600; text-align: right;">ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="table-body-usuarios">
+            <!-- JS render -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Tab: Pisos y Habitaciones -->
-    <div class="settings-tab-content active" id="tab-pisos">
+    <!-- VISTA DETALLE: PISOS (reutiliza el código viejo pero envuelto) -->
+    <div id="settings-detail-pisos" style="display: none; padding: 20px 40px; overflow-y: auto; height: 100%;">
+      <div style="margin-bottom: 20px;">
+        <span style="color: var(--text-muted); font-size: 13px; cursor: pointer;" onclick="closeSettingsDetail()">Ajustes</span> <span style="color: var(--text-muted);">/</span> 
+        <strong style="color: var(--text-active); font-size: 13px;">Pisos y Habitaciones</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+        <div>
+          <h1 class="settings-title" style="font-size: 28px; font-weight: 700; margin-bottom: 5px;">Pisos y Habitaciones</h1>
+          <span style="color: var(--text-muted); font-size: 14px;">Configura la estructura física del hotel.</span>
+        </div>
+      </div>
 
       <div class="settings-two-col">
-
         <!-- Columna izquierda: Lista de pisos -->
         <div class="settings-panel">
           <div class="settings-panel-header">
@@ -295,101 +355,62 @@
       </div>
     </div>
 
-    <!-- Tab: Usuarios -->
-    <div class="settings-tab-content" id="tab-usuarios">
-      <div class="settings-two-col">
-
-        <!-- Formulario nuevo usuario -->
-        <div class="settings-panel">
-          <div class="settings-panel-header">
-            <h2 class="settings-panel-title">REGISTRAR USUARIO</h2>
-          </div>
-          <form id="settings-new-user-form">
-            <div class="settings-form-row">
-              <div class="settings-form-group">
-                <label class="settings-label">Cédula</label>
-                <input type="text" id="snu-cedula" class="settings-input" required placeholder="V12345678">
-              </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Usuario</label>
-                <input type="text" id="snu-usuario" class="settings-input" required placeholder="nombre_usuario">
-              </div>
-            </div>
-            <div class="settings-form-row">
-              <div class="settings-form-group">
-                <label class="settings-label">Nombre</label>
-                <input type="text" id="snu-nombre" class="settings-input" required>
-              </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Apellido</label>
-                <input type="text" id="snu-apellido" class="settings-input" required>
-              </div>
-            </div>
-            <div class="settings-form-row">
-              <div class="settings-form-group">
-                <label class="settings-label">Contraseña</label>
-                <input type="password" id="snu-password" class="settings-input" required>
-              </div>
-              <div class="settings-form-group">
-                <label class="settings-label">Rol</label>
-                <select id="snu-rol" class="settings-input">
-                  <option value="1">Superadmin</option>
-                  <option value="2">Gerencia</option>
-                  <option value="3">Administrador</option>
-                  <option value="4">Contador</option>
-                  <option value="5">Recepción</option>
-                  <option value="6">Mantenimiento</option>
-                  <option value="7">Limpieza</option>
-                  <option value="8">Seguridad</option>
-                  <option value="9">Marketing</option>
-                </select>
-              </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-              <button type="submit" class="settings-btn settings-btn-primary">CREAR USUARIO</button>
-            </div>
-          </form>
+    <!-- MODAL NUEVO USUARIO -->
+    <div class="modal-overlay" id="modal-nuevo-usuario" style="display: none; align-items: center; justify-content: center; z-index: 1000; background: rgba(0,0,0,0.8);">
+      <div class="modal-card" style="width: 500px; padding: 25px; background: var(--bg-panel); border: 1px solid var(--border-gold-light); border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="color: var(--text-active); font-size: 20px; font-weight: 600;">Agregar Nuevo Usuario</h2>
+          <button onclick="document.getElementById('modal-nuevo-usuario').style.display='none';" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 20px;">&times;</button>
         </div>
-
-        <!-- Lista de usuarios -->
-        <div class="settings-panel">
-          <div class="settings-panel-header">
-            <h2 class="settings-panel-title">USUARIOS REGISTRADOS</h2>
-            <button class="settings-btn settings-btn-ghost" id="btn-reload-users">↻ RECARGAR</button>
+        <form id="settings-new-user-form">
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Cédula</label>
+              <input type="text" id="snu-cedula" class="settings-input" required placeholder="V12345678" style="border-radius: 8px;">
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Usuario</label>
+              <input type="text" id="snu-usuario" class="settings-input" required placeholder="nombre_usuario" style="border-radius: 8px;">
+            </div>
           </div>
-          <div class="settings-users-table-wrap">
-            <table class="settings-users-table">
-              <thead>
-                <tr>
-                  <th>Cédula</th>
-                  <th>Usuario</th>
-                  <th>Nombre</th>
-                  <th>Rol</th>
-                </tr>
-              </thead>
-              <tbody id="settings-users-tbody">
-                <!-- Renderizado desde JS -->
-              </tbody>
-            </table>
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Nombre</label>
+              <input type="text" id="snu-nombre" class="settings-input" required style="border-radius: 8px;">
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Apellido</label>
+              <input type="text" id="snu-apellido" class="settings-input" required style="border-radius: 8px;">
+            </div>
           </div>
-        </div>
-
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Contraseña</label>
+              <input type="password" id="snu-password" class="settings-input" required style="border-radius: 8px;">
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Rol</label>
+              <select id="snu-rol" class="settings-input" style="border-radius: 8px;">
+                <option value="1">Superadmin</option>
+                <option value="2">Gerencia</option>
+                <option value="3">Administrador</option>
+                <option value="4">Contador</option>
+                <option value="5">Recepción</option>
+                <option value="6">Mantenimiento</option>
+                <option value="7">Limpieza</option>
+                <option value="8">Seguridad</option>
+                <option value="9">Marketing</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px;">
+            <button type="button" onclick="document.getElementById('modal-nuevo-usuario').style.display='none';" class="settings-btn settings-btn-ghost" style="border-radius: 8px;">CANCELAR</button>
+            <button type="submit" class="settings-btn settings-btn-primary" style="background-color: #5544ff; color: white; border-radius: 8px;">GUARDAR USUARIO</button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <!-- Tab: Permisos -->
-    <div class="settings-tab-content" id="tab-permisos">
-      <div class="settings-panel" style="margin: 20px 28px; flex: 1;">
-        <div class="settings-panel-header">
-          <h2 class="settings-panel-title">GESTIÓN DE ACCESOS Y PERMISOS</h2>
-          <span class="settings-panel-subtitle">Habilita o deshabilita funciones del sistema para cada rol</span>
-        </div>
-        <div class="settings-roles-grid" id="settings-roles-grid" style="padding: 20px; overflow-y: auto; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-          <!-- Renderizado desde JS -->
-          <div class="settings-empty-state"><span class="settings-empty-icon">🔐</span><p>Cargando roles...</p></div>
-        </div>
-      </div>
-    </div>
 
   </div> <!-- FIN MÓDULO AJUSTES -->
 
@@ -671,6 +692,64 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <!-- MODAL EDITAR USUARIO -->
+  <div class="modal-overlay" id="modal-editar-usuario" style="display: none;">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>EDITAR USUARIO</h2>
+        <button class="close-btn" onclick="cerrarModalEditarUsuario()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-editar-usuario">
+          <input type="hidden" id="edit-user-id">
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Cédula</label>
+              <input type="text" id="edit-user-cedula" class="settings-input" required>
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Usuario</label>
+              <input type="text" id="edit-user-usuario" class="settings-input" required>
+            </div>
+          </div>
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Nombre</label>
+              <input type="text" id="edit-user-nombre" class="settings-input" required>
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Apellido</label>
+              <input type="text" id="edit-user-apellido" class="settings-input" required>
+            </div>
+          </div>
+          <div class="settings-form-row">
+            <div class="settings-form-group">
+              <label class="settings-label">Nueva Contraseña (Opcional)</label>
+              <input type="password" id="edit-user-password" class="settings-input" placeholder="Dejar en blanco para no cambiar">
+            </div>
+            <div class="settings-form-group">
+              <label class="settings-label">Rol</label>
+              <select id="edit-user-rol" class="settings-input">
+                <option value="1">Superadmin</option>
+                <option value="2">Gerencia</option>
+                <option value="3">Administrador</option>
+                <option value="4">Contador</option>
+                <option value="5">Recepción</option>
+                <option value="6">Mantenimiento</option>
+                <option value="7">Limpieza</option>
+                <option value="8">Seguridad</option>
+                <option value="9">Marketing</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button type="submit" class="settings-btn settings-btn-primary">GUARDAR CAMBIOS</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -202,6 +202,7 @@ function cambiarModulo(btnElement, moduleName) {
   } else if (moduleName === 'ajustes') {
     if (moduleAjustes) {
       moduleAjustes.style.display = 'flex';
+      if (typeof closeSettingsDetail === 'function') closeSettingsDetail();
       cargarModuloAjustes();
     } else {
       modulePlaceholder.style.display = 'flex';
@@ -232,7 +233,7 @@ async function obtenerHabitaciones() {
 // Configurar// Configurar eventos
 function configurarListeners() {
   // Toggle Theme
-  themeToggleBtn.addEventListener('click', toggleTheme);
+  // themeToggleBtn.addEventListener('click', toggleTheme);
 
   // Selector de pisos
   floorSelectorList.addEventListener('click', (e) => {
@@ -1168,32 +1169,110 @@ async function editarPrecioHabitacion(id, precioActual) {
 // =============================================
 
 async function cargarUsuariosAjustes() {
-  const tbody = document.getElementById('settings-users-tbody');
+  const tbody = document.getElementById('table-body-usuarios');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">Cargando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">Cargando usuarios...</td></tr>';
   try {
     const res = await fetch('/api/usuarios', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--color-out-of-service);">Sin permisos o error al cargar.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">❌ Sin permisos o error al cargar.</td></tr>';
       return;
     }
     const usuarios = await res.json();
     if (usuarios.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--text-muted);">No hay usuarios registrados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">No hay usuarios registrados.</td></tr>';
       return;
     }
     tbody.innerHTML = usuarios.map(u => `
-      <tr>
-        <td>${u.cedula}</td>
-        <td>${u.usuario}</td>
-        <td>${u.nombre} ${u.apellido}</td>
-        <td><span class="settings-rol-badge">${u.rol}</span></td>
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <td style="padding: 15px 10px;">
+          <div style="font-weight: 600; color: var(--text-active);">${u.nombre} ${u.apellido}</div>
+          <div style="font-size: 12px; color: var(--text-muted);">${u.usuario}</div>
+        </td>
+        <td style="padding: 15px 10px;">
+          <span style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; font-size: 10px; text-transform: uppercase;">${u.rol_nombre || u.rol || 'N/A'}</span>
+        </td>
+        <td style="padding: 15px 10px;">
+          <span style="color: #40916c; background: rgba(64,145,108,0.2); padding: 4px 10px; border-radius: 12px; font-size: 10px; font-weight: 600;">ACTIVO</span>
+        </td>
+        <td style="padding: 15px 10px; text-align: right;">
+          <button style="background: none; border: none; color: var(--text-gold); cursor: pointer; margin-right: 10px; font-size: 12px;" onclick='abrirModalEditarUsuario(${JSON.stringify(u)})'>✏ Editar</button>
+          <button style="background: none; border: none; color: #d03a45; cursor: pointer; font-size: 12px;" onclick="eliminarUsuarioAjustes('${u.id}')">🗑 Eliminar</button>
+        </td>
       </tr>
     `).join('');
   } catch (error) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: var(--color-out-of-service);">Error de conexión.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center;">⚠️ Error de conexión al cargar usuarios.</td></tr>';
+  }
+}
+
+function abrirModalEditarUsuario(user) {
+  document.getElementById('edit-user-id').value = user.id;
+  document.getElementById('edit-user-cedula').value = user.cedula;
+  document.getElementById('edit-user-usuario').value = user.usuario;
+  document.getElementById('edit-user-nombre').value = user.nombre;
+  document.getElementById('edit-user-apellido').value = user.apellido;
+  document.getElementById('edit-user-password').value = '';
+  document.getElementById('edit-user-rol').value = user.rol_id;
+  document.getElementById('modal-editar-usuario').style.display = 'flex';
+}
+
+function cerrarModalEditarUsuario() {
+  document.getElementById('modal-editar-usuario').style.display = 'none';
+}
+
+async function manejarEditarUsuario(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-user-id').value;
+  const payload = {
+    cedula: document.getElementById('edit-user-cedula').value.trim(),
+    usuario: document.getElementById('edit-user-usuario').value.trim(),
+    nombre: document.getElementById('edit-user-nombre').value.trim(),
+    apellido: document.getElementById('edit-user-apellido').value.trim(),
+    password: document.getElementById('edit-user-password').value,
+    rol_id: parseInt(document.getElementById('edit-user-rol').value, 10)
+  };
+
+  try {
+    const res = await fetch('/api/usuarios/' + id, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      mostrarToast('✅ Usuario actualizado exitosamente.', 'success');
+      cerrarModalEditarUsuario();
+      cargarUsuariosAjustes();
+    } else {
+      mostrarToast(`❌ ${data.error || 'Error al actualizar'}`, 'error');
+    }
+  } catch (error) {
+    mostrarToast('❌ Fallo de conexión.', 'error');
+  }
+}
+
+async function eliminarUsuarioAjustes(id) {
+  if (!confirm('¿Seguro que deseas eliminar este usuario?')) return;
+  try {
+    const res = await fetch('/api/usuarios/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (res.ok) {
+      mostrarToast('✅ Usuario eliminado.', 'success');
+      cargarUsuariosAjustes();
+    } else {
+      mostrarToast(`❌ ${data.error || 'Error'}`, 'error');
+    }
+  } catch (error) {
+    mostrarToast('❌ Fallo de conexión.', 'error');
   }
 }
 
@@ -1406,3 +1485,39 @@ async function guardarPermisosRol(rolId, rolNombre) {
   });
 })();
 // ====================================================
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const formEditarUsuario = document.getElementById('form-editar-usuario');
+  if (formEditarUsuario) formEditarUsuario.addEventListener('submit', manejarEditarUsuario);
+
+  const btnReloadUsers = document.getElementById('btn-reload-users');
+  if (btnReloadUsers) btnReloadUsers.addEventListener('click', cargarUsuariosAjustes);
+});
+
+// ====================================================
+// NAVEGACIÓN DASHBOARD AJUSTES
+// ====================================================
+function openSettingsDetail(viewId) {
+  // Ocultar dashboard
+  document.getElementById('settings-dashboard-view').style.display = 'none';
+  
+  // Ocultar todas las vistas de detalle
+  document.getElementById('settings-detail-usuarios').style.display = 'none';
+  document.getElementById('settings-detail-pisos').style.display = 'none';
+  
+  // Mostrar la solicitada
+  if (viewId === 'usuarios') {
+    document.getElementById('settings-detail-usuarios').style.display = 'block';
+    cargarUsuariosAjustes();
+  } else if (viewId === 'pisos') {
+    document.getElementById('settings-detail-pisos').style.display = 'block';
+    if (typeof cargarPisos === 'function') cargarPisos();
+  }
+}
+
+function closeSettingsDetail() {
+  document.getElementById('settings-detail-usuarios').style.display = 'none';
+  document.getElementById('settings-detail-pisos').style.display = 'none';
+  document.getElementById('settings-dashboard-view').style.display = 'block';
+}
