@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plano de Habitaciones - Grand Horizon Luxury Hotel</title>
+  <title data-hotel-titulo-recepcion>Plano de Habitaciones - Grand Horizon Luxury Hotel</title>
   <!-- Google Fonts: Cinzel (Luxury Serif) & Outfit (Clean Sans) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Configuración central del hotel: cambia el nombre aquí y se actualiza en toda la app -->
+  <script src="hotel.config.js"></script>
 </head>
 <body>
 
   <!-- BARRA DE NAVEGACIÓN PRINCIPAL -->
   <nav class="global-navbar">
     <div class="nav-brand">
-      <span class="nav-logo">GH</span>
-      <span class="nav-title">GRAND HORIZON LUXURY HOTEL</span>
+      <span class="nav-logo" data-hotel-siglas>GH</span>
+      <span class="nav-title" data-hotel-nombre>GRAND HORIZON LUXURY HOTEL</span>
     </div>
     <div class="nav-links" id="main-nav-links">
       <button class="nav-item active" data-module="recepcion">RECEPCIÓN</button>

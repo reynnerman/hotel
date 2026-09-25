@@ -3,13 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso al Sistema - Grand Horizon Luxury Hotel</title>
+  <title data-hotel-titulo-login>Acceso al Sistema - System Hotel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Configuración central del hotel -->
+  <script src="hotel.config.js"></script>
   <style>
-    /* Estilos específicos para la pantalla de Login integrados para mantener estética luxury */
+    /* Transiciones de tema en la página de login */
+    body.login-body,
+    .login-container,
+    .login-form input {
+      transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+    }
+
     body.login-body {
       display: flex;
       justify-content: center;
@@ -19,13 +27,54 @@
       background-image: radial-gradient(circle at center, rgba(197, 168, 128, 0.05) 0%, transparent 70%);
     }
 
+    /* Botón de tema flotante en esquina superior derecha */
+    .login-theme-btn {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-gold);
+      color: var(--text-gold);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      padding: 6px 14px;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.25s, color 0.25s, transform 0.15s, box-shadow 0.25s;
+      position: fixed;
+      overflow: hidden;
+      user-select: none;
+      z-index: 999;
+    }
+    .login-theme-btn:hover {
+      background: var(--border-gold);
+      color: var(--bg-dark);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+    .login-theme-btn:active {
+      transform: scale(0.93);
+      box-shadow: none;
+    }
+    .login-theme-btn .t-icon {
+      font-size: 13px;
+      transition: transform 0.3s;
+    }
+    .login-theme-btn:active .t-icon {
+      transform: rotate(30deg) scale(1.2);
+    }
+
     .login-container {
       background: var(--bg-panel);
       border: 1px solid var(--border-gold);
       padding: 40px;
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       text-align: center;
       position: relative;
     }
@@ -78,7 +127,7 @@
       font-size: 14px;
       font-family: var(--font-sans);
       outline: none;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s, background 0.4s, color 0.4s;
     }
 
     .login-form input:focus {
@@ -98,6 +147,8 @@
       cursor: pointer;
       transition: all 0.3s;
       margin-top: 20px;
+      position: relative;
+      overflow: hidden;
     }
 
     .login-btn:hover {
@@ -106,19 +157,45 @@
       border-color: var(--text-active);
     }
 
+    .login-btn:active {
+      transform: scale(0.97);
+      box-shadow: none;
+    }
+
     #login-error {
-      color: #ff4c4c;
+      color: #e05555;
       font-size: 12px;
       margin-top: 15px;
       min-height: 15px;
+    }
+
+    /* Ripple en el botón de login */
+    .ripple-wave {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(197, 168, 128, 0.35);
+      transform: scale(0);
+      animation: ripple-expand 0.55s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-expand {
+      0%   { transform: scale(0); opacity: 0.7; }
+      80%  { transform: scale(3.5); opacity: 0.15; }
+      100% { transform: scale(4); opacity: 0; }
     }
   </style>
 </head>
 <body class="login-body">
 
+  <!-- Botón de tema flotante -->
+  <button class="login-theme-btn" id="login-theme-btn" title="Cambiar tema">
+    <span class="t-icon" id="login-theme-icon">☽</span>
+    <span id="login-theme-label">MODO OSCURO</span>
+  </button>
+
   <div class="login-container">
-    <div class="login-logo">GRAND HORIZON</div>
-    <div class="login-subtitle">Sistema de Gestión Operativa</div>
+    <div class="login-logo" data-hotel-nombre>SYSTEM HOTEL</div>
+    <div class="login-subtitle" data-hotel-subtitulo>Sistema de Gestión Operativa</div>
 
     <form class="login-form" id="loginForm">
       <div class="form-group">
@@ -130,22 +207,71 @@
         <input type="password" id="password" required>
       </div>
       
-      <button type="submit" class="login-btn">INGRESAR</button>
+      <button type="submit" class="login-btn" id="login-submit-btn">INGRESAR</button>
       <div id="login-error"></div>
     </form>
   </div>
 
   <script>
-    // Si ya tiene token, redirigir al index
+    // ── Redirigir si ya tiene sesión ──────────────────────
     if (localStorage.getItem('hotel_token')) {
-      window.location.href = '/';
+      window.location.replace('/');
+      throw new Error('Ya autenticado, redirigiendo.');
     }
 
+    // ── Tema claro/oscuro en login ────────────────────────
+    const temaGuardado = localStorage.getItem('hotelTheme') || 'light'; // DEFAULT: CLARO
+    let temaActual = temaGuardado;
+
+    function aplicarTema(tema) {
+      document.body.setAttribute('data-theme', tema);
+      const icon  = document.getElementById('login-theme-icon');
+      const label = document.getElementById('login-theme-label');
+      if (tema === 'dark') {
+        icon.textContent  = '☀';
+        label.textContent = 'MODO CLARO';
+      } else {
+        icon.textContent  = '☽';
+        label.textContent = 'MODO OSCURO';
+      }
+    }
+
+    aplicarTema(temaActual);
+
+    document.getElementById('login-theme-btn').addEventListener('click', () => {
+      temaActual = temaActual === 'dark' ? 'light' : 'dark';
+      aplicarTema(temaActual);
+      localStorage.setItem('hotelTheme', temaActual);
+    });
+
+    // ── Ripple en el botón de ingresar ────────────────────
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.login-btn, .login-theme-btn');
+      if (!btn) return;
+      const old = btn.querySelector('.ripple-wave');
+      if (old) old.remove();
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(btn.offsetWidth, btn.offsetHeight);
+      const wave = document.createElement('span');
+      wave.classList.add('ripple-wave');
+      wave.style.width  = wave.style.height = `${size}px`;
+      wave.style.left   = `${e.clientX - rect.left - size / 2}px`;
+      wave.style.top    = `${e.clientY - rect.top  - size / 2}px`;
+      btn.appendChild(wave);
+      wave.addEventListener('animationend', () => wave.remove(), { once: true });
+    });
+
+    // ── Formulario de login ───────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      const errDiv = document.getElementById('login-error');
+      const user    = document.getElementById('username').value;
+      const pass    = document.getElementById('password').value;
+      const errDiv  = document.getElementById('login-error');
+      const btn     = document.getElementById('login-submit-btn');
+
+      btn.disabled = true;
+      btn.textContent = 'VERIFICANDO...';
+      errDiv.textContent = '';
 
       try {
         const response = await fetch('/api/login', {
@@ -157,15 +283,19 @@
         const data = await response.json();
 
         if (response.ok) {
-          // Guardar token y datos de usuario en localStorage
           localStorage.setItem('hotel_token', data.token);
           localStorage.setItem('hotel_user', JSON.stringify(data.usuario));
-          window.location.href = '/'; // Redirigir al dashboard
+          btn.textContent = '✓ ACCESO CONCEDIDO';
+          setTimeout(() => { window.location.replace('/'); }, 400);
         } else {
           errDiv.textContent = data.error || 'Credenciales inválidas.';
+          btn.disabled = false;
+          btn.textContent = 'INGRESAR';
         }
       } catch (err) {
         errDiv.textContent = 'Error de conexión con el servidor.';
+        btn.disabled = false;
+        btn.textContent = 'INGRESAR';
       }
     });
   </script>
