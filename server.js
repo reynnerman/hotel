@@ -83,7 +83,7 @@ app.get('/api/usuarios', authenticateToken, async (req, res) => {
     }
     const db = await getDb();
     const usuarios = await db.all(`
-      SELECT u.id, u.cedula, u.usuario, u.nombre, u.apellido, u.rol_id, r.nombre as rol_nombre
+      SELECT u.id, u.cedula, u.usuario, u.nombre, u.apellido, u.telefono, u.rol_id, r.nombre as rol_nombre
       FROM usuarios u
       JOIN roles r ON u.rol_id = r.id
     `);
@@ -98,7 +98,7 @@ app.post('/api/usuarios', authenticateToken, async (req, res) => {
     if (!req.user.permisos.includes('GESTIONAR_USUARIOS')) {
       return res.status(403).json({ error: 'No tienes permisos para gestionar usuarios.' });
     }
-    const { cedula, usuario, nombre, apellido, password, rol_id } = req.body;
+    const { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
     const db = await getDb();
     
     // Check if user already exists
@@ -107,8 +107,8 @@ app.post('/api/usuarios', authenticateToken, async (req, res) => {
 
     const hashed = bcrypt.hashSync(password, 10);
     await db.run(
-      'INSERT INTO usuarios (cedula, usuario, nombre, apellido, password, rol_id) VALUES ($1, $2, $3, $4, $5, $6)',
-      [cedula, usuario, nombre, apellido, hashed, rol_id]
+      'INSERT INTO usuarios (cedula, usuario, nombre, apellido, telefono, password, rol_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [cedula, usuario, nombre, apellido, telefono, hashed, rol_id]
     );
     res.json({ message: 'Usuario creado exitosamente.' });
   } catch (error) {
@@ -122,19 +122,19 @@ app.put('/api/usuarios/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'No tienes permisos para gestionar usuarios.' });
     }
     const { id } = req.params;
-    const { cedula, usuario, nombre, apellido, password, rol_id } = req.body;
+    const { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
     const db = await getDb();
 
     if (password) {
       const hashed = bcrypt.hashSync(password, 10);
       await db.run(
-        'UPDATE usuarios SET cedula = $1, usuario = $2, nombre = $3, apellido = $4, password = $5, rol_id = $6 WHERE id = $7',
-        [cedula, usuario, nombre, apellido, hashed, rol_id, id]
+        'UPDATE usuarios SET cedula = $1, usuario = $2, nombre = $3, apellido = $4, telefono = $5, password = $6, rol_id = $7 WHERE id = $8',
+        [cedula, usuario, nombre, apellido, telefono, hashed, rol_id, id]
       );
     } else {
       await db.run(
-        'UPDATE usuarios SET cedula = $1, usuario = $2, nombre = $3, apellido = $4, rol_id = $5 WHERE id = $6',
-        [cedula, usuario, nombre, apellido, rol_id, id]
+        'UPDATE usuarios SET cedula = $1, usuario = $2, nombre = $3, apellido = $4, telefono = $5, rol_id = $6 WHERE id = $7',
+        [cedula, usuario, nombre, apellido, telefono, rol_id, id]
       );
     }
     res.json({ message: 'Usuario actualizado exitosamente.' });

@@ -1283,6 +1283,7 @@ async function manejarCrearUsuarioAjustes(e) {
     usuario: document.getElementById('snu-usuario').value.trim(),
     nombre: document.getElementById('snu-nombre').value.trim(),
     apellido: document.getElementById('snu-apellido').value.trim(),
+    telefono: document.getElementById('snu-telefono').value.trim(),
     password: document.getElementById('snu-password').value,
     rol_id: parseInt(document.getElementById('snu-rol').value, 10)
   };
