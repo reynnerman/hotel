@@ -244,6 +244,23 @@ app.put('/api/habitaciones/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// Actualizar posición de la habitación (drag & drop)
+app.put('/api/habitaciones/:id/posicion', authenticateToken, async (req, res) => {
+  try {
+    if (!req.user.permisos.includes('GESTIONAR_HABITACIONES')) {
+      return res.status(403).json({ error: 'No tienes permisos para configurar pisos.' });
+    }
+    const { id } = req.params;
+    const { pos_x, pos_y } = req.body;
+    const db = await getDb();
+    await db.run('UPDATE habitaciones SET pos_x = $1, pos_y = $2 WHERE id = $3', [pos_x, pos_y, id]);
+    res.json({ message: 'Posición actualizada correctamente.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar la posición de la habitación.' });
+  }
+});
+
 // Cambiar de habitación
 app.put('/api/habitaciones/:id/cambiar', authenticateToken, async (req, res) => {
   try {

@@ -96,22 +96,8 @@
       <div class="blueprint-area">
         <div class="blueprint-grid"></div> <!-- Grid elegante dorado tenue -->
         
-        <div class="map-wrapper">
-          <!-- Ala Norte (Habitaciones Impares) -->
-          <div class="wing north-wing" id="north-wing">
-            <!-- Dinámico -->
-          </div>
-
-          <!-- Pasillo Central -->
-          <div class="central-corridor">
-            <span class="corridor-label">GALERÍA CENTRAL</span>
-            <div class="corridor-line"></div>
-          </div>
-
-          <!-- Ala Sur (Habitaciones Pares) -->
-          <div class="wing south-wing" id="south-wing">
-            <!-- Dinámico -->
-          </div>
+        <div class="map-wrapper" id="reception-map-canvas" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;">
+          <!-- Dinámico: aquí se renderizan las habitaciones del piso en posición absoluta -->
         </div>
 
       </div>
@@ -313,11 +299,13 @@
             <span class="settings-panel-subtitle" id="ajustes-hab-count"></span>
           </div>
 
-          <div class="settings-rooms-grid" id="ajustes-rooms-grid">
+          <!-- Canvas para Drag & Drop (reemplaza al grid anterior) -->
+          <div id="ajustes-rooms-canvas" style="position: relative; width: 100%; height: 500px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-gold); border-radius: 8px; margin-bottom: 20px;">
             <div class="settings-empty-state" id="ajustes-empty-state">
               <span class="settings-empty-icon">🏨</span>
-              <p>Haz clic en un piso para ver sus habitaciones.</p>
+              <p>Selecciona un piso para organizar el mapa arrastrando las habitaciones.</p>
             </div>
+            <!-- Dinámico: habitaciones arrastrables -->
           </div>
 
           <!-- Agregar habitación individual -->
