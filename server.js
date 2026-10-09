@@ -521,6 +521,23 @@ app.post('/api/pisos/:piso/habitaciones', authenticateToken, async (req, res) =>
   }
 });
 
+// Editar datos de la habitación
+app.put('/api/habitaciones/:id/editar', authenticateToken, async (req, res) => {
+  if (!req.user.permisos.includes('GESTIONAR_HABITACIONES')) {
+    return res.status(403).json({ error: 'No tienes permisos para gestionar habitaciones.' });
+  }
+  try {
+    const { numero, tipo, precioNoche } = req.body;
+    const db = await getDb();
+    const precio = precioNoche ? parseFloat(precioNoche) : 50.0;
+    const result = await db.run('UPDATE habitaciones SET numero = ?, tipo = ?, precioNoche = ? WHERE id = ?', [numero, tipo, precio, req.params.id]);
+    if (result.changes === 0) return res.status(404).json({ error: 'Habitación no encontrada.' });
+    res.json({ message: 'Habitación actualizada.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar habitación.' });
+  }
+});
+
 // Eliminar una habitación
 app.delete('/api/habitaciones/:id', authenticateToken, async (req, res) => {
   if (!req.user.permisos.includes('GESTIONAR_HABITACIONES')) {

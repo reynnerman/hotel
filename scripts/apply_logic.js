@@ -1,11 +1,10 @@
-const fs = require('fs');
-let text = fs.readFileSync('public/app.js', 'utf8');
+ï»¿const fs = require('fs');
+let text = fs.readFileSync('public/js/app.js', 'utf8');
 
-// Replace renderizarMapaHabitaciones
-const i1 = text.indexOf('// Renderizar las habitaciones en el plano de planta');
-const i2 = text.indexOf('function abrirModalHabitacion');
-if (i1 !== -1 && i2 !== -1) {
-    const rep1 = `// Renderizar las habitaciones en el plano de planta (Libre)
+const target1Start = text.indexOf('// Renderizar las habitaciones en el plano de planta');
+const target1End = text.indexOf('function abrirModalHabitacion');
+
+const rep1 = `// Renderizar las habitaciones en el plano de planta (Libre)
 function renderizarMapaHabitaciones() {
   const mapCanvas = document.getElementById('reception-map-canvas');
   if (!mapCanvas) return;
@@ -43,16 +42,14 @@ function renderizarMapaHabitaciones() {
   });
 }
 
-// Abrir Modal de Habitación (Símil Terminal de Diagnóstico)`;
-    text = text.substring(0, i1) + rep1 + text.substring(i2 + 61);
-    console.log('REPLACED 1');
-}
+// Abrir Modal de HabitaciÃ³n (SÃ­mil Terminal de DiagnÃ³stico)
+`;
+text = text.substring(0, target1Start) + rep1 + text.substring(target1End + 61);
 
-// Replace cargarHabitacionesPiso
-const i3 = text.indexOf('async function cargarHabitacionesPiso(piso)');
-const i4 = text.indexOf('async function crearHabitacionAjustes');
-if (i3 !== -1 && i4 !== -1) {
-    const rep2 = `let isDraggingRoom = false;
+const target2Start = text.indexOf('async function cargarHabitacionesPiso(piso)');
+const target2End = text.indexOf('async function eliminarPiso(piso)');
+
+const rep2 = `let isDraggingRoom = false;
 
 function setupDraggableRoom(el, habitacion) {
   let isDragging = false;
@@ -102,7 +99,7 @@ function setupDraggableRoom(el, habitacion) {
         datosHabitaciones[habIndex].pos_y = newY;
       }
     } catch (err) {
-      console.error('Error guardando posición', err);
+      console.error('Error guardando posiciÃ³n', err);
     }
   });
 }
@@ -118,7 +115,7 @@ async function cargarHabitacionesPiso(piso) {
   const canvas = document.getElementById('ajustes-rooms-canvas');
   const addRoomPanel = document.getElementById('settings-create-room-panel');
 
-  if (title) title.textContent = \`PISO \${piso} — HABITACIONES\`;
+  if (title) title.textContent = \`PISO \${piso} â€” HABITACIONES\`;
   if (canvas) canvas.innerHTML = \`<div class="settings-loading">Cargando...</div>\`;
 
   try {
@@ -128,24 +125,24 @@ async function cargarHabitacionesPiso(piso) {
     if (!res.ok) throw new Error();
     const habitaciones = await res.json();
 
-    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ón'}\`;
+    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'Ã³n'}\`;
 
     const puedeEliminar = usuarioLogueado.permisos && usuarioLogueado.permisos.includes('GESTIONAR_HABITACIONES');
 
     if (habitaciones.length === 0) {
-      if (canvas) canvas.innerHTML = \`<div class="settings-empty-state"><span class="settings-empty-icon">??</span><p>Este piso no tiene habitaciones.</p></div>\`;
+      if (canvas) canvas.innerHTML = \`<div class="settings-empty-state"><span class="settings-empty-icon"></span><p>Este piso no tiene habitaciones.</p></div>\`;
     } else {
       if (canvas) canvas.innerHTML = '';
       habitaciones.forEach(h => {
         const el = document.createElement('div');
-        el.className = \`room-draggable status-\${h.estado}\`;
+        el.className = \`room-draggable settings-room-chip status-\${h.estado}\`;
         el.style.left = (h.pos_x || 0) + 'px';
         el.style.top = (h.pos_y || 0) + 'px';
         
         el.innerHTML = \`
           \${h.numero}
           \${puedeEliminar ? \`
-            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">×</button>
+            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">Ã—</button>
           \` : ''}
         \`;
         if (canvas) canvas.appendChild(el);
@@ -162,12 +159,9 @@ async function cargarHabitacionesPiso(piso) {
   }
 }
 
-async function crearHabitacionAjustes`;
-    text = text.substring(0, i3) + rep2 + text.substring(i4 + 37);
-    console.log('REPLACED 2');
-} else {
-    console.log(i3, i4);
-}
+`;
 
-fs.writeFileSync('public/app.js', text);
+text = text.substring(0, target2Start) + rep2 + text.substring(target2End);
+
+fs.writeFileSync('public/js/app.js', text);
 

@@ -1,5 +1,5 @@
-const fs = require('fs');
-let text = fs.readFileSync('public/app.js', 'utf8');
+ï»¿const fs = require('fs');
+let text = fs.readFileSync('public/js/app.js', 'utf8');
 
 const rep2 = `let isDraggingRoom = false;
 
@@ -51,7 +51,7 @@ function setupDraggableRoom(el, habitacion) {
         datosHabitaciones[habIndex].pos_y = newY;
       }
     } catch (err) {
-      console.error('Error guardando posición', err);
+      console.error('Error guardando posiciï¿½n', err);
     }
   });
 }
@@ -67,7 +67,7 @@ async function cargarHabitacionesPiso(piso) {
   const canvas = document.getElementById('ajustes-rooms-canvas');
   const addRoomPanel = document.getElementById('settings-create-room-panel');
 
-  if (title) title.textContent = \`PISO \${piso} — HABITACIONES\`;
+  if (title) title.textContent = \`PISO \${piso} ï¿½ HABITACIONES\`;
   if (canvas) canvas.innerHTML = \`<div class="settings-loading">Cargando...</div>\`;
 
   try {
@@ -77,7 +77,7 @@ async function cargarHabitacionesPiso(piso) {
     if (!res.ok) throw new Error();
     const habitaciones = await res.json();
 
-    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ón'}\`;
+    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ï¿½n'}\`;
 
     const puedeEliminar = usuarioLogueado.permisos && usuarioLogueado.permisos.includes('GESTIONAR_HABITACIONES');
 
@@ -94,7 +94,7 @@ async function cargarHabitacionesPiso(piso) {
         el.innerHTML = \`
           \${h.numero}
           \${puedeEliminar ? \`
-            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">×</button>
+            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">ï¿½</button>
           \` : ''}
         \`;
         if (canvas) canvas.appendChild(el);
@@ -122,5 +122,5 @@ if (i3 !== -1 && i4 !== -1) {
     console.log(i3, i4);
 }
 
-fs.writeFileSync('public/app.js', text);
+fs.writeFileSync('public/js/app.js', text);
 

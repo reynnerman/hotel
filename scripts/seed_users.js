@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getDb } = require('./database.js');
+const { getDb } = require('../database.js');
 const bcrypt = require('bcrypt');
 
 function hashPassword(password) {

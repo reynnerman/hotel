@@ -1,5 +1,89 @@
-const fs = require('fs');
-let currentContent = fs.readFileSync('public/app.js', 'utf8');
+ï»¿const fs = require('fs');
+let text = fs.readFileSync('public/js/app.js', 'utf8');
+
+const target1 = `// Renderizar las habitaciones en el plano de planta (Norte y Sur wings)
+function renderizarMapaHabitaciones() {
+  // Limpiar ambas secciones
+  northWing.innerHTML = '';
+  southWing.innerHTML = '';
+
+  // Filtrar habitaciones por piso activo
+  const habitacionesPiso = datosHabitaciones.filter(h => h.piso === pisoActual);
+
+  // Distribuir en el plano: impares al norte, pares al sur
+  habitacionesPiso.forEach(habitacion => {
+    let habVisual = { ...habitacion };
+
+    // Si hay un filtro activo, calculamos su estado visual
+    if (filtroFechas) {
+      if (habitacion.estado === 'OCUPADA' && habitacion.fechaEntrada && habitacion.fechaSalida) {
+        const fIn = new Date(filtroFechas.in);
+        const fOut = new Date(filtroFechas.out);
+        const hIn = new Date(habitacion.fechaEntrada);
+        const hOut = new Date(habitacion.fechaSalida);
+        
+        // Comprobar si se solapan los rangos de fechas
+        if (hIn < fOut && hOut > fIn) {
+          habVisual.estado = 'OCUPADA';
+        } else {
+          // Si no se solapan, para esas fechas estï¿½ disponible
+          habVisual.estado = 'DISPONIBLE';
+          habVisual.fechaEntrada = null;
+          habVisual.fechaSalida = null;
+        }
+      }
+    }
+
+    const roomNumInt = parseInt(habVisual.numero, 10);
+    const card = crearTarjetaHabitacion(habVisual, habitacion);
+
+    if (roomNumInt % 2 !== 0) {
+      // Impares (Norte)
+      northWing.appendChild(card);
+    } else {
+      // Pares (Sur)
+      southWing.appendChild(card);
+    }
+  });
+}`;
+
+const rep1 = `// Renderizar las habitaciones en el plano de planta (Libre)
+function renderizarMapaHabitaciones() {
+  const mapCanvas = document.getElementById('reception-map-canvas');
+  if (!mapCanvas) return;
+  mapCanvas.innerHTML = '';
+
+  const habitacionesPiso = datosHabitaciones.filter(h => h.piso === pisoActual);
+
+  habitacionesPiso.forEach(habitacion => {
+    let habVisual = { ...habitacion };
+
+    if (filtroFechas) {
+      if (habitacion.estado === 'OCUPADA' && habitacion.fechaEntrada && habitacion.fechaSalida) {
+        const fIn = new Date(filtroFechas.in);
+        const fOut = new Date(filtroFechas.out);
+        const hIn = new Date(habitacion.fechaEntrada);
+        const hOut = new Date(habitacion.fechaSalida);
+        
+        if (hIn < fOut && hOut > fIn) {
+          habVisual.estado = 'OCUPADA';
+        } else {
+          habVisual.estado = 'DISPONIBLE';
+          habVisual.fechaEntrada = null;
+          habVisual.fechaSalida = null;
+        }
+      }
+    }
+
+    const card = crearTarjetaHabitacion(habVisual, habitacion);
+    card.classList.add('room-absolute');
+    
+    card.style.left = (habVisual.pos_x || 0) + 'px';
+    card.style.top = (habVisual.pos_y || 0) + 'px';
+    
+    mapCanvas.appendChild(card);
+  });
+}`;
 
 const target2 = `async function cargarHabitacionesPiso(piso) {
   pisoSeleccionadoAjustes = piso;
@@ -13,7 +97,7 @@ const target2 = `async function cargarHabitacionesPiso(piso) {
   const grid = document.getElementById('ajustes-rooms-grid');
   const addRoomPanel = document.getElementById('settings-create-room-panel');
 
-  if (title) title.textContent = \`PISO \${piso} — HABITACIONES\`;
+  if (title) title.textContent = \`PISO \${piso} ï¿½ HABITACIONES\`;
   if (grid) grid.innerHTML = \`<div class="settings-loading">Cargando...</div>\`;
 
   try {
@@ -23,7 +107,7 @@ const target2 = `async function cargarHabitacionesPiso(piso) {
     if (!res.ok) throw new Error();
     const habitaciones = await res.json();
 
-    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ón'}\`;
+    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ï¿½n'}\`;
 
     const puedeEliminar = usuarioLogueado.permisos && usuarioLogueado.permisos.includes('GESTIONAR_HABITACIONES');
 
@@ -36,7 +120,7 @@ const target2 = `async function cargarHabitacionesPiso(piso) {
           <span class="settings-room-chip-tipo">\${h.tipo} - $\${h.precioNoche || 50}</span>
           \${puedeEliminar ? \`
             <button class="settings-room-chip-price-edit" onclick="editarPrecioHabitacion('\${h.id}', \${h.precioNoche || 50})" title="Editar Precio" style="position:absolute; bottom:5px; right:5px; background:none; border:none; cursor:pointer; color:var(--text-gold); font-size:12px;">??</button>
-            <button class="settings-room-chip-del" onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar">×</button>
+            <button class="settings-room-chip-del" onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar">ï¿½</button>
           \` : ''}
         </div>
       \`).join('');
@@ -99,7 +183,7 @@ function setupDraggableRoom(el, habitacion) {
         datosHabitaciones[habIndex].pos_y = newY;
       }
     } catch (err) {
-      console.error('Error guardando posición', err);
+      console.error('Error guardando posiciï¿½n', err);
     }
   });
 }
@@ -115,7 +199,7 @@ async function cargarHabitacionesPiso(piso) {
   const canvas = document.getElementById('ajustes-rooms-canvas');
   const addRoomPanel = document.getElementById('settings-create-room-panel');
 
-  if (title) title.textContent = \`PISO \${piso} — HABITACIONES\`;
+  if (title) title.textContent = \`PISO \${piso} ï¿½ HABITACIONES\`;
   if (canvas) canvas.innerHTML = \`<div class="settings-loading">Cargando...</div>\`;
 
   try {
@@ -125,7 +209,7 @@ async function cargarHabitacionesPiso(piso) {
     if (!res.ok) throw new Error();
     const habitaciones = await res.json();
 
-    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ón'}\`;
+    if (count) count.textContent = \`\${habitaciones.length} habitaci\${habitaciones.length !== 1 ? 'ones' : 'ï¿½n'}\`;
 
     const puedeEliminar = usuarioLogueado.permisos && usuarioLogueado.permisos.includes('GESTIONAR_HABITACIONES');
 
@@ -142,7 +226,7 @@ async function cargarHabitacionesPiso(piso) {
         el.innerHTML = \`
           \${h.numero}
           \${puedeEliminar ? \`
-            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">×</button>
+            <button onclick="eliminarHabitacion('\${h.id}', \${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">ï¿½</button>
           \` : ''}
         \`;
         if (canvas) canvas.appendChild(el);
@@ -157,16 +241,29 @@ async function cargarHabitacionesPiso(piso) {
   } catch (error) {
     if (canvas) canvas.innerHTML = \`<div class="settings-empty-state"><p>Error al cargar habitaciones.</p></div>\`;
   }
-}`;
-
-currentContent = currentContent.replace(/\r\n/g, '\n');
-const target2Norm = target2.replace(/\r\n/g, '\n');
-const rep2Norm = rep2.replace(/\r\n/g, '\n');
-
-if (currentContent.includes(target2Norm)) {
-    fs.writeFileSync('public/app.js', currentContent.replace(target2Norm, rep2Norm));
-    console.log('SUCCESS_2');
-} else {
-    console.log('FAIL_2');
 }
+
+`;
+
+text = text.replace(/\r\n/g, '\n');
+const t1 = target1.replace(/\r\n/g, '\n');
+const r1 = rep1.replace(/\r\n/g, '\n');
+const t2 = target2.replace(/\r\n/g, '\n');
+const r2 = rep2.replace(/\r\n/g, '\n');
+
+if (text.includes(t1)) {
+  text = text.split(t1).join(r1);
+  console.log('REPLACED 1');
+} else {
+  console.log('FAILED 1');
+}
+
+if (text.includes(t2)) {
+  text = text.split(t2).join(r2);
+  console.log('REPLACED 2');
+} else {
+  console.log('FAILED 2');
+}
+
+fs.writeFileSync('public/js/app.js', text);
 

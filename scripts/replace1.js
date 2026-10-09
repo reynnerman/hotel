@@ -1,5 +1,5 @@
-const fs = require('fs');
-const content = fs.readFileSync('public/app.js', 'utf8');
+﻿const fs = require('fs');
+const content = fs.readFileSync('public/js/app.js', 'utf8');
 
 const regex = /\/\/ Renderizar las habitaciones en el plano de planta \(Norte y Sur wings\)[\s\S]*?\}\n/g;
 
@@ -44,4 +44,4 @@ function renderizarMapaHabitaciones() {
 ;
 });
 
-fs.writeFileSync('public/app.js', newContent);
+fs.writeFileSync('public/js/app.js', newContent);

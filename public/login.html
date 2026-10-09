@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/style.css">
   <!-- Configuración central del hotel -->
-  <script src="hotel.config.js"></script>
+  <script src="js/hotel.config.js"></script>
   <style>
     /* Transiciones de tema en la página de login */
     body.login-body,
@@ -183,9 +183,188 @@
       80%  { transform: scale(3.5); opacity: 0.15; }
       100% { transform: scale(4); opacity: 0; }
     }
+
+    /* ── Fondo con imagen (opción 2) ── */
+    body.login-body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url('media/img/login-bg.jpg') center/cover no-repeat;
+      filter: blur(4px);
+      transform: scale(1.05);
+      z-index: -2;
+    }
+    body.login-body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 8, 12, 0.72);
+      z-index: -1;
+      transition: background 0.4s;
+    }
+    body.login-body[data-theme="light"]::after {
+      background: rgba(245, 240, 230, 0.78);
+    }
+    .login-container {
+      background: rgba(15, 15, 22, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 0 60px rgba(197, 168, 128, 0.18), 0 10px 30px rgba(0,0,0,0.4);
+      animation: login-fade 0.8s ease both;
+    }
+    body.login-body[data-theme="light"] .login-container {
+      background: rgba(255, 255, 255, 0.6);
+    }
+    @keyframes login-fade {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Información en espacios vacíos (opción 4) ── */
+    .login-clock {
+      position: fixed;
+      top: 18px; left: 22px;
+      font-family: var(--font-sans);
+      color: var(--text-gold);
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      line-height: 1.6;
+    }
+    .login-clock #clock-time {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--text-active);
+      letter-spacing: 2px;
+    }
+    .login-footer {
+      position: fixed;
+      bottom: 16px; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--text-gold);
+      text-transform: uppercase;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #4caf7a;
+      margin-right: 7px;
+      box-shadow: 0 0 8px #4caf7a;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot { 50% { opacity: 0.35; } }
+
+    /* ── Layout dividido (side by side) ── */
+    body.login-body::before,
+    body.login-body::after { display: none; }
+    body.login-body {
+      justify-content: center;
+      padding-left: 58%;
+      box-sizing: border-box;
+    }
+    .login-visual {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: 58%;
+      background:
+        linear-gradient(90deg, rgba(8,8,12,0.25) 0%, rgba(8,8,12,0.55) 70%, var(--bg-dark) 100%),
+        linear-gradient(0deg, rgba(8,8,12,0.85) 0%, transparent 45%),
+        url('media/img/login-bg.jpg') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 60px 90px;
+      animation: login-fade 1s ease both;
+    }
+    .login-visual .tagline {
+      font-family: var(--font-serif);
+      font-size: 38px;
+      line-height: 1.2;
+      color: #f3e7d0;
+      letter-spacing: 2px;
+      max-width: 460px;
+    }
+    .login-visual .tagline-sub {
+      margin-top: 14px;
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #e2c89a;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    }
+    .login-visual .tagline-line {
+      width: 60px; height: 1px;
+      background: var(--text-active);
+      margin-bottom: 22px;
+    }
+    .login-container {
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border: none;
+      box-shadow: none;
+    }
+    .login-container::before { display: none; }
+    /* Groupbox */
+    .login-container {
+      border: 1px solid var(--border-gold);
+      padding: 48px 40px 36px;
+      margin: 0 24px;
+    }
+    .groupbox-title {
+      position: absolute;
+      top: -8px; left: 24px;
+      padding: 0 12px;
+      background: var(--bg-dark);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-gold);
+      line-height: 16px;
+    }
+    .login-footer {
+      left: 58%;
+      justify-content: center;
+      padding: 0;
+      color: var(--text-gold);
+    }
+    body.login-body[data-theme="light"] .login-footer,
+    body.login-body[data-theme="light"] .login-clock { color: #6b5a3e; }
+    body.login-body[data-theme="light"] .groupbox-title { color: #6b5a3e; }
+    body.login-body[data-theme="light"] .login-container { background: transparent; }
+    .login-clock { z-index: 2; left: calc(58% + 24px); }
+    /* Modo claro: sin difuminado, corte limpio con línea dorada */
+    body.login-body[data-theme="light"] .login-visual {
+      background:
+        linear-gradient(0deg, rgba(8,8,12,0.8) 0%, transparent 45%),
+        url('media/img/login-bg.jpg') center/cover no-repeat;
+      border-right: 1px solid var(--border-gold);
+    }
+    @media (max-width: 900px) {
+      body.login-body { padding-left: 0; }
+      .login-clock { left: 22px; }
+      .login-visual { width: 100%; opacity: 0.25; z-index: -1; }
+    }
   </style>
 </head>
 <body class="login-body">
+
+  <!-- Panel visual izquierdo -->
+  <div class="login-visual" aria-hidden="true">
+    <div class="tagline-line"></div>
+    <div class="tagline">Gestión con elegancia</div>
+    <div class="tagline-sub">Control total de su hotel</div>
+  </div>
 
   <!-- Botón de tema flotante -->
   <button class="login-theme-btn" id="login-theme-btn" title="Cambiar tema">
@@ -194,6 +373,7 @@
   </button>
 
   <div class="login-container">
+    <span class="groupbox-title">Acceso al sistema</span>
     <div class="login-logo" data-hotel-nombre>SYSTEM HOTEL</div>
     <div class="login-subtitle" data-hotel-subtitulo>Sistema de Gestión Operativa</div>
 
@@ -212,7 +392,27 @@
     </form>
   </div>
 
+  <div class="login-clock">
+    <div id="clock-time">--:--</div>
+    <div id="clock-date"></div>
+  </div>
+
+  <footer class="login-footer">
+    <span>© <span id="footer-year"></span> System Hotel</span>
+  </footer>
+
   <script>
+    // ── Reloj y año ───────────────────────────────────────
+    function tickClock() {
+      const n = new Date();
+      document.getElementById('clock-time').textContent =
+        n.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('clock-date').textContent =
+        n.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+    tickClock(); setInterval(tickClock, 1000);
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+
     // ── Redirigir si ya tiene sesión ──────────────────────
     if (localStorage.getItem('hotel_token')) {
       window.location.replace('/');

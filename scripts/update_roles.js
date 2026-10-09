@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getDb } = require('./database.js');
+const { getDb } = require('../database.js');
 
 async function updateRoles() {
   const db = await getDb();

@@ -223,6 +223,7 @@ async function obtenerHabitaciones() {
     if (response.status === 401 || response.status === 403) return logout();
     if (!response.ok) throw new Error('Error al obtener habitaciones.');
     datosHabitaciones = await response.json();
+    construirSelectorPisos();
     actualizarPanel();
   } catch (error) {
     console.error('Error:', error);
@@ -230,8 +231,29 @@ async function obtenerHabitaciones() {
   }
 }
 
+// Construye el selector lateral de pisos a partir de los pisos existentes en la BD
+function construirSelectorPisos() {
+  const pisos = [...new Set(datosHabitaciones.map(h => h.piso))].sort((a, b) => b - a);
+
+  if (pisos.length === 0) {
+    floorSelectorList.innerHTML = '';
+    return;
+  }
+  if (!pisos.includes(pisoActual)) pisoActual = pisos[pisos.length - 1];
+
+  floorSelectorList.innerHTML = pisos.map(p => {
+    const etiqueta = p === 1 ? 'PB' : `${p - 1}°P`;
+    return `<button class="floor-hud-btn ${p === pisoActual ? 'active' : ''}" data-floor="${p}">${etiqueta}</button>`;
+  }).join('');
+
+  const nombre = nombresPisos[pisoActual] || `Piso ${pisoActual}`;
+  floorHeaderTitle.textContent = nombre.toUpperCase();
+  if (corridorLabel) corridorLabel.textContent = nombre;
+}
+
 // Configurar// Configurar eventos
 function configurarListeners() {
+  iniciarPanZoomMapa();
   // Toggle Theme
   // themeToggleBtn.addEventListener('click', toggleTheme);
 
@@ -425,6 +447,8 @@ function calcularEstadisticas() {
   });
 
   statAvailable.textContent = conteos.DISPONIBLE;
+  const statTotal = document.getElementById('stat-total');
+  if (statTotal) statTotal.textContent = datosHabitaciones.length;
   statOccupied.textContent = conteos.OCUPADA;
   statDirty.textContent = conteos.LIMPIEZA;
   statMaintenance.textContent = conteos.MANTENIMIENTO;
@@ -504,7 +528,7 @@ function crearTarjetaHabitacion(habitacionVisual, habitacionOriginal) {
     <div class="room-hud-num">${habitacionVisual.numero}</div>
     <div class="room-hud-details">
       <span class="room-hud-type">${habitacionVisual.tipo}</span>
-      <span class="room-hud-status-badge">${traduccionesEstadoCorto[habitacionVisual.estado]}</span>
+      <span class="room-hud-status-badge">$${habitacionVisual.precioNoche || 50}</span>
     </div>
     ${dateIndicator}
   `;
@@ -520,6 +544,10 @@ function renderizarMapaHabitaciones() {
   const mapCanvas = document.getElementById('reception-map-canvas');
   if (!mapCanvas) return;
   mapCanvas.innerHTML = '';
+  const mundo = document.createElement('div');
+  mundo.id = 'map-world';
+  mapCanvas.appendChild(mundo);
+  aplicarVistaMapa();
 
   const habitacionesPiso = datosHabitaciones.filter(h => h.piso === pisoActual);
 
@@ -549,8 +577,78 @@ function renderizarMapaHabitaciones() {
     card.style.left = (habVisual.pos_x || 0) + 'px';
     card.style.top = (habVisual.pos_y || 0) + 'px';
     
-    mapCanvas.appendChild(card);
+    mundo.appendChild(card);
   });
+}
+
+// ── Pan y zoom del plano ──────────────────────────────
+const vistaMapa = { x: 0, y: 0, k: 1 };
+
+function aplicarVistaMapa() {
+  const mundo = document.getElementById('map-world');
+  if (mundo) mundo.style.transform = `translate(${vistaMapa.x}px, ${vistaMapa.y}px) scale(${vistaMapa.k})`;
+  const lbl = document.getElementById('map-zoom-label');
+  if (lbl) lbl.textContent = Math.round(vistaMapa.k * 100) + '%';
+}
+
+function zoomMapa(factor, cx, cy) {
+  const canvas = document.getElementById('reception-map-canvas');
+  const rect = canvas.getBoundingClientRect();
+  if (cx === undefined) { cx = rect.width / 2; cy = rect.height / 2; }
+  const nk = Math.min(3, Math.max(0.3, vistaMapa.k * factor));
+  const real = nk / vistaMapa.k;
+  vistaMapa.x = cx - (cx - vistaMapa.x) * real;
+  vistaMapa.y = cy - (cy - vistaMapa.y) * real;
+  vistaMapa.k = nk;
+  aplicarVistaMapa();
+}
+
+function iniciarPanZoomMapa() {
+  const canvas = document.getElementById('reception-map-canvas');
+  if (!canvas || canvas.dataset.panzoom) return;
+  canvas.dataset.panzoom = '1';
+
+  // Controles de zoom
+  const ctrl = document.createElement('div');
+  ctrl.className = 'map-zoom-controls';
+  ctrl.innerHTML = `
+    <button type="button" id="map-zoom-in" title="Acercar">+</button>
+    <span id="map-zoom-label">100%</span>
+    <button type="button" id="map-zoom-out" title="Alejar">−</button>
+    <button type="button" id="map-zoom-reset" title="Restablecer vista">↺</button>`;
+  canvas.parentElement.appendChild(ctrl);
+  document.getElementById('map-zoom-in').onclick = () => zoomMapa(1.2);
+  document.getElementById('map-zoom-out').onclick = () => zoomMapa(1 / 1.2);
+  document.getElementById('map-zoom-reset').onclick = () => {
+    vistaMapa.x = 0; vistaMapa.y = 0; vistaMapa.k = 1; aplicarVistaMapa();
+  };
+
+  // Arrastrar en zonas sin habitación
+  let arrastrando = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || e.target.closest('.room-hud-card')) return;
+    arrastrando = true;
+    sx = e.clientX; sy = e.clientY; ox = vistaMapa.x; oy = vistaMapa.y;
+    canvas.classList.add('panning');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!arrastrando) return;
+    vistaMapa.x = ox + (e.clientX - sx);
+    vistaMapa.y = oy + (e.clientY - sy);
+    aplicarVistaMapa();
+  });
+  window.addEventListener('mouseup', () => {
+    arrastrando = false;
+    canvas.classList.remove('panning');
+  });
+
+  // Zoom con la rueda, centrado en el cursor
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    zoomMapa(e.deltaY < 0 ? 1.1 : 1 / 1.1, e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
 }
 
 // Abrir Modal de Habitación (Símil Terminal de Diagnóstico)
@@ -1036,7 +1134,8 @@ async function cargarHabitacionesPiso(piso) {
         el.innerHTML = `
           ${h.numero}
           ${puedeEliminar ? `
-            <button onclick="eliminarHabitacion('${h.id}', ${piso})" title="Eliminar" style="position:absolute; top:-8px; right:-8px; background:var(--color-danger); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;">×</button>
+            <button class="room-chip-action-btn btn-edit" onclick="editarHabitacionCompleta('${h.id}', '${h.numero}', '${h.tipo}', ${h.precioNoche || 50}, ${piso})" title="Editar">✎</button>
+            <button class="room-chip-action-btn btn-delete" onclick="eliminarHabitacion('${h.id}', ${piso})" title="Eliminar">×</button>
           ` : ''}
         `;
         if (canvas) canvas.appendChild(el);
@@ -1072,6 +1171,32 @@ async function eliminarPiso(piso) {
     }
   } catch (error) {
     mostrarToast('❌ Error de conexión.', 'error');
+  }
+}
+
+async function editarHabitacionCompleta(id, numActual, tipoActual, precioActual, piso) {
+  const nuevoNum = prompt(`Editar número de habitación (Actual: ${numActual}):`, numActual);
+  if (!nuevoNum) return;
+  const nuevoTipo = prompt(`Editar tipo (Sencilla, Doble, Suite) (Actual: ${tipoActual}):`, tipoActual);
+  if (!nuevoTipo) return;
+  const nuevoPrecio = prompt(`Editar precio por noche (USD) (Actual: ${precioActual}):`, precioActual);
+  if (!nuevoPrecio) return;
+
+  try {
+    const res = await fetch(`/api/habitaciones/${id}/editar`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ numero: nuevoNum, tipo: nuevoTipo, precioNoche: parseFloat(nuevoPrecio) })
+    });
+    if (res.ok) {
+      mostrarToast('✅ Habitación actualizada', 'success');
+      cargarHabitacionesPiso(piso);
+      obtenerPisos(); // Refrescar globales si es necesario
+    } else {
+      mostrarToast('❌ Error al actualizar', 'error');
+    }
+  } catch(e) {
+    mostrarToast('❌ Error de conexión', 'error');
   }
 }
 

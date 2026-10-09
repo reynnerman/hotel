@@ -1,4 +1,4 @@
 ﻿const fs = require('fs');
-let text = fs.readFileSync('public/app.js', 'utf8');
+let text = fs.readFileSync('public/js/app.js', 'utf8');
 text = text.replace('ccionada = habitacion;', 'function abrirModalHabitacion(habitacion) {\n  habitacionSeleccionada = habitacion;');
-fs.writeFileSync('public/app.js', text);
+fs.writeFileSync('public/js/app.js', text);
