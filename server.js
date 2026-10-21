@@ -571,6 +571,289 @@ app.put('/api/habitaciones/:id/precio', authenticateToken, async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
+// ENDPOINTS DE GESTIÓN DE INVENTARIO
+// ----------------------------------------------------
+
+// Departamentos estándar del hotel para asignación rápida
+const DEPARTAMENTOS_HOTEL = [
+  'Recepción',
+  'Limpieza',
+  'Mantenimiento',
+  'Seguridad',
+  'Administración',
+  'Contabilidad',
+  'Marketing',
+  'Gerencia',
+  'Lavandería',
+  'Restaurante / Bar',
+  'Almacén General'
+];
+
+// Obtener opciones de ayuda para asignaciones (habitaciones y departamentos)
+app.get('/api/inventario/opciones', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const habitaciones = await db.all('SELECT id, numero, piso, tipo FROM habitaciones ORDER BY piso ASC, numero ASC');
+    res.json({
+      departamentos: DEPARTAMENTOS_HOTEL,
+      habitaciones: habitaciones,
+      estados: ['Asignado', 'Mantenimiento', 'Dañado', 'Para Cambio', 'Disponible']
+    });
+  } catch (error) {
+    console.error('Error al obtener opciones de inventario:', error);
+    res.status(500).json({ error: 'Error al obtener opciones para inventario.' });
+  }
+});
+
+// Listar elementos del inventario con buscador en tiempo real, filtros y acumuladores/contadores
+app.get('/api/inventario', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const { q, estado, asignado_tipo, asignado_a } = req.query;
+
+    // Obtener todos los ítems para calcular los acumuladores globales y luego filtrar
+    const todosLosItems = await db.all('SELECT * FROM inventario ORDER BY id DESC');
+
+    // Calcular acumuladores / contadores de estado
+    const contadores = {
+      total: 0,
+      total_unidades: 0,
+      asignado: 0,
+      mantenimiento: 0,
+      danado: 0,
+      para_cambio: 0,
+      disponible: 0
+    };
+
+    todosLosItems.forEach(item => {
+      const cant = parseInt(item.cantidad, 10) || 1;
+      contadores.total += 1;
+      contadores.total_unidades += cant;
+
+      const est = (item.estado || '').toLowerCase().trim();
+      if (est === 'asignado' || est === 'en uso') {
+        contadores.asignado += 1;
+      } else if (est === 'mantenimiento') {
+        contadores.mantenimiento += 1;
+      } else if (est === 'dañado' || est === 'danado') {
+        contadores.danado += 1;
+      } else if (est === 'para cambio') {
+        contadores.para_cambio += 1;
+      } else {
+        contadores.disponible += 1;
+      }
+    });
+
+    // Filtrar los ítems según los parámetros enviados por el buscador y filtros
+    let itemsFiltrados = todosLosItems;
+
+    // Filtro por palabra clave (buscador en tiempo real)
+    if (q && q.trim() !== '') {
+      const busqueda = q.trim().toLowerCase();
+      itemsFiltrados = itemsFiltrados.filter(item => {
+        const codigo = (item.codigo || '').toLowerCase();
+        const nombre = (item.nombre || '').toLowerCase();
+        const carac = (item.caracteristica || '').toLowerCase();
+        const sub = (item.sub_caracteristica || '').toLowerCase();
+        const est = (item.estado || '').toLowerCase();
+        const asig = (item.asignado_a || '').toLowerCase();
+        const notas = (item.notas || '').toLowerCase();
+        return (
+          codigo.includes(busqueda) ||
+          nombre.includes(busqueda) ||
+          carac.includes(busqueda) ||
+          sub.includes(busqueda) ||
+          est.includes(busqueda) ||
+          asig.includes(busqueda) ||
+          notas.includes(busqueda)
+        );
+      });
+    }
+
+    // Filtro por estado
+    if (estado && estado !== 'todos' && estado.trim() !== '') {
+      const estadoFiltro = estado.toLowerCase().trim();
+      itemsFiltrados = itemsFiltrados.filter(item => {
+        const est = (item.estado || '').toLowerCase().trim();
+        if (estadoFiltro === 'dañado' || estadoFiltro === 'danado') {
+          return est === 'dañado' || est === 'danado';
+        }
+        if (estadoFiltro === 'asignado' || estadoFiltro === 'en uso') {
+          return est === 'asignado' || est === 'en uso';
+        }
+        return est === estadoFiltro;
+      });
+    }
+
+    // Filtro por tipo de asignación (departamento o habitación)
+    if (asignado_tipo && asignado_tipo !== 'todos' && asignado_tipo.trim() !== '') {
+      itemsFiltrados = itemsFiltrados.filter(item => (item.asignado_tipo || '').toLowerCase() === asignado_tipo.toLowerCase());
+    }
+
+    // Filtro por asignado_a específico
+    if (asignado_a && asignado_a !== 'todos' && asignado_a.trim() !== '') {
+      itemsFiltrados = itemsFiltrados.filter(item => (item.asignado_a || '').toLowerCase() === asignado_a.toLowerCase());
+    }
+
+    res.json({
+      items: itemsFiltrados,
+      contadores: contadores
+    });
+  } catch (error) {
+    console.error('Error al listar inventario:', error);
+    res.status(500).json({ error: 'Error al obtener elementos del inventario.' });
+  }
+});
+
+// Crear nuevo elemento en el inventario
+app.post('/api/inventario', authenticateToken, async (req, res) => {
+  try {
+    const { nombre, caracteristica, sub_caracteristica, estado, asignado_tipo, asignado_a, cantidad, notas, codigo } = req.body;
+
+    if (!nombre || !caracteristica || !sub_caracteristica) {
+      return res.status(400).json({ error: 'El nombre, característica y sub-característica son requeridos.' });
+    }
+
+    const estadoFinal = estado || 'Disponible';
+    const cantFinal = parseInt(cantidad, 10) > 0 ? parseInt(cantidad, 10) : 1;
+
+    // Validación si está asignado
+    let tipoAsignado = asignado_tipo || null;
+    let destinoAsignado = asignado_a || null;
+
+    if (estadoFinal === 'Asignado') {
+      if (!tipoAsignado || !destinoAsignado) {
+        return res.status(400).json({ error: 'Para artículos con estado "Asignado", debe indicar si es a Habitación o Departamento y su destino.' });
+      }
+    }
+
+    // Generar código único si no se proporcionó
+    let codigoFinal = codigo ? codigo.trim().toUpperCase() : null;
+    if (!codigoFinal) {
+      const prefijo = nombre.replace(/[^a-zA-Z]/g, '').slice(0, 3).toUpperCase() || 'INV';
+      const numAleatorio = Math.floor(1000 + Math.random() * 9000);
+      codigoFinal = `INV-${prefijo}-${numAleatorio}`;
+    }
+
+    const db = await getDb();
+    await db.run(`
+      INSERT INTO inventario (codigo, nombre, caracteristica, sub_caracteristica, estado, asignado_tipo, asignado_a, cantidad, notas)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [codigoFinal, nombre.trim(), caracteristica.trim(), sub_caracteristica.trim(), estadoFinal, tipoAsignado, destinoAsignado, cantFinal, notas ? notas.trim() : '']);
+
+    const nuevoItem = await db.get('SELECT * FROM inventario WHERE codigo = ?', [codigoFinal]);
+    res.json({ message: 'Elemento agregado al inventario exitosamente.', item: nuevoItem });
+  } catch (error) {
+    console.error('Error al crear elemento de inventario:', error);
+    res.status(500).json({ error: 'Error al registrar el elemento en el inventario.' });
+  }
+});
+
+// Actualizar un elemento del inventario
+app.put('/api/inventario/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, caracteristica, sub_caracteristica, estado, asignado_tipo, asignado_a, cantidad, notas, codigo } = req.body;
+
+    const db = await getDb();
+    const itemActual = await db.get('SELECT * FROM inventario WHERE id = ?', [id]);
+    if (!itemActual) {
+      return res.status(404).json({ error: 'Elemento de inventario no encontrado.' });
+    }
+
+    const nuevoNombre = nombre !== undefined ? nombre.trim() : itemActual.nombre;
+    const nuevaCarac = caracteristica !== undefined ? caracteristica.trim() : itemActual.caracteristica;
+    const nuevaSub = sub_caracteristica !== undefined ? sub_caracteristica.trim() : itemActual.sub_caracteristica;
+    const nuevoEstado = estado !== undefined ? estado : itemActual.estado;
+    const nuevaCantidad = cantidad !== undefined && parseInt(cantidad, 10) > 0 ? parseInt(cantidad, 10) : itemActual.cantidad;
+    const nuevoCodigo = codigo !== undefined ? codigo.trim().toUpperCase() : itemActual.codigo;
+    const nuevasNotas = notas !== undefined ? notas.trim() : itemActual.notas;
+
+    let nuevoTipo = asignado_tipo !== undefined ? asignado_tipo : itemActual.asignado_tipo;
+    let nuevoAsignadoA = asignado_a !== undefined ? asignado_a : itemActual.asignado_a;
+
+    if (nuevoEstado === 'Asignado' && (!nuevoTipo || !nuevoAsignadoA)) {
+      return res.status(400).json({ error: 'Debe especificar el departamento o habitación de asignación.' });
+    }
+
+    await db.run(`
+      UPDATE inventario
+      SET codigo = ?, nombre = ?, caracteristica = ?, sub_caracteristica = ?, estado = ?, asignado_tipo = ?, asignado_a = ?, cantidad = ?, notas = ?, fecha_actualizacion = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [nuevoCodigo, nuevoNombre, nuevaCarac, nuevaSub, nuevoEstado, nuevoTipo, nuevoAsignadoA, nuevaCantidad, nuevasNotas, id]);
+
+    const itemActualizado = await db.get('SELECT * FROM inventario WHERE id = ?', [id]);
+    res.json({ message: 'Elemento actualizado exitosamente.', item: itemActualizado });
+  } catch (error) {
+    console.error('Error al actualizar elemento de inventario:', error);
+    res.status(500).json({ error: 'Error al actualizar el elemento en el inventario.' });
+  }
+});
+
+// Cambio rápido de estado de un elemento
+app.put('/api/inventario/:id/estado', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado, asignado_tipo, asignado_a, notas } = req.body;
+
+    if (!estado) {
+      return res.status(400).json({ error: 'El estado es requerido.' });
+    }
+
+    const db = await getDb();
+    const itemActual = await db.get('SELECT * FROM inventario WHERE id = ?', [id]);
+    if (!itemActual) {
+      return res.status(404).json({ error: 'Elemento no encontrado.' });
+    }
+
+    let finalTipo = asignado_tipo !== undefined ? asignado_tipo : itemActual.asignado_tipo;
+    let finalAsignadoA = asignado_a !== undefined ? asignado_a : itemActual.asignado_a;
+
+    if (estado === 'Asignado' && (!finalTipo || !finalAsignadoA)) {
+      return res.status(400).json({ error: 'Debe indicar habitación o departamento para asignar.' });
+    }
+
+    // Si cambia a Disponible, limpiamos la asignación
+    if (estado === 'Disponible') {
+      finalTipo = null;
+      finalAsignadoA = null;
+    }
+
+    const finalNotas = notas !== undefined ? notas : itemActual.notas;
+
+    await db.run(`
+      UPDATE inventario
+      SET estado = ?, asignado_tipo = ?, asignado_a = ?, notas = ?, fecha_actualizacion = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `, [estado, finalTipo, finalAsignadoA, finalNotas, id]);
+
+    const itemActualizado = await db.get('SELECT * FROM inventario WHERE id = ?', [id]);
+    res.json({ message: 'Estado actualizado correctamente.', item: itemActualizado });
+  } catch (error) {
+    console.error('Error al cambiar estado en inventario:', error);
+    res.status(500).json({ error: 'Error al cambiar el estado del elemento.' });
+  }
+});
+
+// Eliminar elemento del inventario
+app.delete('/api/inventario/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = await getDb();
+    const item = await db.get('SELECT * FROM inventario WHERE id = ?', [id]);
+    if (!item) {
+      return res.status(404).json({ error: 'Elemento no encontrado.' });
+    }
+
+    await db.run('DELETE FROM inventario WHERE id = ?', [id]);
+    res.json({ message: `Elemento "${item.nombre} (${item.codigo})" eliminado del inventario.` });
+  } catch (error) {
+    console.error('Error al eliminar elemento de inventario:', error);
+    res.status(500).json({ error: 'Error al eliminar el elemento del inventario.' });
+  }
+});
+
 // Servir la interfaz frontend en cualquier otra ruta
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
