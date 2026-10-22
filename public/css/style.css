@@ -3117,3 +3117,349 @@ textarea:focus {
   max-width: 400px;
   margin: 0 auto;
 }
+
+/* ==================================================== */
+/* ESTILOS: NIVELES ESPECIALES & CLIENTES VIP           */
+/* ==================================================== */
+
+/* Pestañas de subnavegación en Ajustes */
+.niveles-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  margin-bottom: -1px;
+}
+
+.niveles-tab-btn:hover {
+  color: var(--text-active);
+  background: rgba(197, 168, 128, 0.05);
+}
+
+.niveles-tab-btn.active {
+  color: var(--text-gold);
+  border-bottom-color: var(--text-gold);
+  background: rgba(197, 168, 128, 0.08);
+}
+
+/* Cajas de métricas superiores (VIP Stats) */
+.vip-stat-box {
+  background: var(--bg-panel);
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.vip-stat-box::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.vip-stat-lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.vip-stat-val {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-active);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.vip-stat-sub {
+  font-size: 11px;
+  color: var(--text-gold);
+}
+
+/* Tarjetas de Niveles Especiales */
+.nivel-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nivel-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-gold-light);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.nivel-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+.nivel-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nivel-card-name {
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text-active);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nivel-card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 16px;
+  min-height: 34px;
+}
+
+/* Badge de Descuento */
+.vip-discount-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(64, 145, 108, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="light"] .vip-discount-tag {
+  background: rgba(27, 122, 79, 0.12);
+  color: #1b7a4f;
+  border-color: rgba(27, 122, 79, 0.3);
+}
+
+/* Lista de Beneficios */
+.nivel-beneficios-section {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  flex: 1;
+}
+
+[data-theme="light"] .nivel-beneficios-section {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.nivel-beneficios-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-gold);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nivel-beneficios-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nivel-beneficios-list li {
+  font-size: 12px;
+  color: var(--text-active);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.nivel-beneficios-list li svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #34d399;
+}
+
+.nivel-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="light"] .nivel-card-footer {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.nivel-clients-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Variantes de Color de las Tarjetas e Indicadores */
+.nivel-card.color-gold {
+  border-left: 4px solid #c5a880;
+}
+.nivel-card.color-blue {
+  border-left: 4px solid #38bdf8;
+}
+.nivel-card.color-purple {
+  border-left: 4px solid #c084fc;
+}
+.nivel-card.color-emerald {
+  border-left: 4px solid #34d399;
+}
+.nivel-card.color-ruby {
+  border-left: 4px solid #f87171;
+}
+
+/* Pills de Nivel VIP */
+.vip-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.vip-pill-gold {
+  background: rgba(197, 168, 128, 0.15);
+  color: #e5c59e;
+  border: 1px solid rgba(197, 168, 128, 0.4);
+}
+[data-theme="light"] .vip-pill-gold {
+  background: rgba(155, 125, 74, 0.15);
+  color: #7a5c2e;
+  border-color: rgba(155, 125, 74, 0.4);
+}
+
+.vip-pill-blue {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+[data-theme="light"] .vip-pill-blue {
+  background: rgba(0, 102, 170, 0.12);
+  color: #0066aa;
+  border-color: rgba(0, 102, 170, 0.4);
+}
+
+.vip-pill-purple {
+  background: rgba(192, 132, 252, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.4);
+}
+[data-theme="light"] .vip-pill-purple {
+  background: rgba(126, 34, 206, 0.12);
+  color: #7e22ce;
+  border-color: rgba(126, 34, 206, 0.4);
+}
+
+.vip-pill-emerald {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+[data-theme="light"] .vip-pill-emerald {
+  background: rgba(27, 122, 79, 0.12);
+  color: #1b7a4f;
+  border-color: rgba(27, 122, 79, 0.4);
+}
+
+.vip-pill-ruby {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+[data-theme="light"] .vip-pill-ruby {
+  background: rgba(176, 32, 48, 0.12);
+  color: #b02030;
+  border-color: rgba(176, 32, 48, 0.4);
+}
+
+.vip-pill-neutral {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+[data-theme="light"] .vip-pill-neutral {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar del Cliente */
+.cliente-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(197, 168, 128, 0.15);
+  color: var(--text-gold);
+  border: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* Badge VIP en Modal de Habitación (Recepción) */
+.room-vip-banner {
+  background: linear-gradient(90deg, rgba(197, 168, 128, 0.15) 0%, rgba(197, 168, 128, 0.03) 100%);
+  border-left: 3px solid var(--border-gold);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}

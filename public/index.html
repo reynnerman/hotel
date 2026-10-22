@@ -181,6 +181,19 @@
           <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 25px; min-height: 60px;">Registro, configuración y alta de pisos y habitaciones en la plataforma. Define tipos, precios y ubicaciones.</p>
           <div style="text-align: right; color: var(--text-gold); font-size: 13px; font-weight: 500;">Administrar &rarr;</div>
         </div>
+
+        <!-- Card Niveles Especiales (VIP) -->
+        <div class="settings-module-card" onclick="openSettingsDetail('niveles')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 25px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <h3 style="color: var(--text-active); font-size: 18px; font-weight: 600; font-family: var(--font-sans); display: flex; align-items: center; gap: 10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              Niveles Especiales
+            </h3>
+            <span class="vip-pill-badge vip-pill-gold" style="font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border-gold); background: rgba(197, 168, 128, 0.15); color: var(--text-gold);">CLIENTES VIP</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 25px; min-height: 60px;">Asignación de categorías preferenciales a clientes (VIP 1, VIP 2, VIP 3 o personalizadas). Permite definir descuentos, privilegios y beneficios exclusivos.</p>
+          <div style="text-align: right; color: var(--text-gold); font-size: 13px; font-weight: 500;">Administrar &rarr;</div>
+        </div>
       </div>
     </div>
 
@@ -398,6 +411,116 @@
       </div>
     </div>
 
+
+    <!-- VISTA DETALLE: NIVELES ESPECIALES (VIP) Y CLIENTES -->
+    <div id="settings-detail-niveles" style="display: none; padding: 20px 40px; overflow-y: auto; height: 100%;">
+      <div style="margin-bottom: 20px;">
+        <span style="color: var(--text-muted); font-size: 13px; cursor: pointer;" onclick="closeSettingsDetail()">Ajustes</span> <span style="color: var(--text-muted);">/</span> 
+        <strong style="color: var(--text-active); font-size: 13px;">Niveles Especiales &amp; Clientes VIP</strong>
+      </div>
+
+      <!-- Cabecera de Niveles Especiales -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <div>
+          <h1 class="settings-title" style="font-size: 28px; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 10px;">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Niveles Especiales y Clientes VIP
+          </h1>
+          <span style="color: var(--text-muted); font-size: 14px;">Administre categorías preferenciales para clientes, porcentajes de descuento y privilegios de estancia.</span>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" id="btn-nuevo-nivel-modal" class="settings-btn" style="background: rgba(197, 168, 128, 0.15); color: var(--text-gold); border: 1px solid var(--border-gold); border-radius: 8px; padding: 10px 18px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            NUEVA CATEGORÍA
+          </button>
+          <button type="button" id="btn-nuevo-cliente-modal" class="settings-btn settings-btn-primary" style="background-color: var(--border-gold); color: #0a0b0e; border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+            REGISTRAR CLIENTE
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Pestañas (Tabs) -->
+      <div style="display: flex; gap: 10px; border-bottom: 1px solid rgba(197, 168, 128, 0.2); margin-bottom: 25px;">
+        <button type="button" id="tab-btn-niveles-catalogo" class="niveles-tab-btn active" onclick="cambiarTabNiveles('catalogo')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          Categorías y Privilegios
+        </button>
+        <button type="button" id="tab-btn-niveles-clientes" class="niveles-tab-btn" onclick="cambiarTabNiveles('clientes')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Directorio de Clientes Asignados
+        </button>
+      </div>
+
+      <!-- TAB 1: CATÁLOGO DE NIVELES Y PRIVILEGIOS -->
+      <div id="view-tab-niveles-catalogo">
+        <!-- Indicadores Rápidos -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px;">
+          <div class="vip-stat-box">
+            <span class="vip-stat-lbl">Categorías Activas</span>
+            <span class="vip-stat-val" id="vip-stat-total-niveles">0</span>
+            <span class="vip-stat-sub">Etiquetas VIP configuradas</span>
+          </div>
+          <div class="vip-stat-box">
+            <span class="vip-stat-lbl">Clientes con Nivel</span>
+            <span class="vip-stat-val" id="vip-stat-total-clientes">0</span>
+            <span class="vip-stat-sub">Huéspedes preferenciales</span>
+          </div>
+          <div class="vip-stat-box">
+            <span class="vip-stat-lbl">Máximo Descuento</span>
+            <span class="vip-stat-val" id="vip-stat-max-desc">0%</span>
+            <span class="vip-stat-sub">Mayor beneficio de tarifa</span>
+          </div>
+        </div>
+
+        <!-- Grid de Tarjetas de Niveles -->
+        <div id="grid-niveles-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+          <!-- Renderizado dinámico desde JS -->
+        </div>
+      </div>
+
+      <!-- TAB 2: DIRECTORIO DE CLIENTES -->
+      <div id="view-tab-niveles-clientes" style="display: none;">
+        <!-- Barra de Búsqueda y Filtros de Clientes -->
+        <div class="settings-panel" style="padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+            <div style="display: flex; gap: 15px; flex: 1; min-width: 280px; flex-wrap: wrap;">
+              <div style="position: relative; flex: 1; min-width: 220px;">
+                <input type="text" id="clientes-input-buscar" class="settings-input" placeholder="Buscar por cliente, documento, correo o nivel..." style="width: 100%; border-radius: 8px; padding: 10px 15px 10px 36px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              </div>
+              <select id="clientes-select-filtro-nivel" class="settings-input" style="border-radius: 8px; padding: 10px 15px; min-width: 200px;">
+                <option value="todos">Todos los Niveles</option>
+                <option value="sin_nivel">Sin Nivel Asignado</option>
+                <!-- Se poblarán los niveles dinámicamente -->
+              </select>
+            </div>
+            <div style="font-size: 13px; color: var(--text-muted);" id="clientes-badge-conteo">
+              Cargando clientes...
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de Clientes -->
+        <div class="settings-panel" style="padding: 20px; border-radius: 12px; overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: var(--font-sans);">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+                <th style="padding: 12px 10px; font-weight: 600;">CLIENTE / HUÉSPED</th>
+                <th style="padding: 12px 10px; font-weight: 600;">DOCUMENTO</th>
+                <th style="padding: 12px 10px; font-weight: 600;">CONTACTO</th>
+                <th style="padding: 12px 10px; font-weight: 600;">NIVEL ESPECIAL</th>
+                <th style="padding: 12px 10px; font-weight: 600;">DESCUENTO &amp; BENEFICIOS</th>
+                <th style="padding: 12px 10px; font-weight: 600; text-align: right;">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="clientes-table-body">
+              <!-- Renderizado dinámico desde JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
   </div> <!-- FIN MÓDULO AJUSTES -->
 
@@ -1153,8 +1276,227 @@
         </button>
       </div>
     </div>
+  <!-- ==================================================== -->
+  <!-- MODALES DE NIVELES ESPECIALES Y CLIENTES VIP         -->
+  <!-- ==================================================== -->
+
+  <!-- 1. MODAL NUEVO / EDITAR NIVEL ESPECIAL -->
+  <div class="inv-modal-overlay" id="modal-nivel-form">
+    <div class="inv-modal-card" style="max-width: 620px;">
+      <div class="inv-modal-header">
+        <h3 id="modal-nivel-title" style="display: flex; align-items: center; gap: 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span id="modal-nivel-title-text">NUEVA CATEGORÍA ESPECIAL</span>
+        </h3>
+        <button class="close-btn" id="modal-nivel-btn-cerrar">&times;</button>
+      </div>
+      <form id="form-nivel-especial">
+        <input type="hidden" id="nivel-form-id">
+        <div class="inv-modal-body">
+          <div class="inv-form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="inv-form-group" style="flex: 2;">
+              <label class="inv-form-label">Nombre de la Etiqueta / Nivel <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="nivel-form-nombre" class="inv-form-input" placeholder="ej: VIP 1, VIP 2, VIP 3, Huésped Platino" required>
+            </div>
+            <div class="inv-form-group" style="flex: 1;">
+              <label class="inv-form-label">Descuento (%)</label>
+              <input type="number" id="nivel-form-descuento" class="inv-form-input" placeholder="0" min="0" max="100" step="0.5" value="0">
+            </div>
+          </div>
+
+          <div class="inv-form-group" style="margin-bottom: 15px;">
+            <label class="inv-form-label">Color Distintivo del Nivel</label>
+            <select id="nivel-form-color" class="inv-form-select">
+              <option value="gold">Dorado Imperial (Oro Clásico)</option>
+              <option value="blue">Zafiro Azul (Corporativo / Ejecutivo)</option>
+              <option value="purple">Amatista Real (Exclusivo / Presidencial)</option>
+              <option value="emerald">Verde Esmeralda (Eco / Preferente)</option>
+              <option value="ruby">Rojo Rubí (VIP Distinguido)</option>
+            </select>
+          </div>
+
+          <div class="inv-form-group" style="margin-bottom: 15px;">
+            <label class="inv-form-label">Privilegios y Beneficios Especiales</label>
+            <textarea id="nivel-form-beneficios" class="inv-form-textarea" rows="3" placeholder="Indique los beneficios separados por comas o saltos de línea (ej: Desayuno buffet incluido, Late check-out hasta las 14:00, Trago de bienvenida en recepción, 15% de descuento en estadías)"></textarea>
+            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px;">Estos beneficios se mostrarán organizados en la ficha del huésped y en la recepción.</span>
+          </div>
+
+          <div class="inv-form-group" style="margin-bottom: 5px;">
+            <label class="inv-form-label">Descripción o Criterio de Asignación</label>
+            <textarea id="nivel-form-descripcion" class="inv-form-textarea" rows="2" placeholder="ej: Asignado a huéspedes frecuentes con más de 5 estancias anuales o convenios empresariales."></textarea>
+          </div>
+        </div>
+        <div class="inv-modal-footer">
+          <button type="button" class="inv-btn-secondary" id="modal-nivel-btn-cancelar">Cancelar</button>
+          <button type="submit" class="inv-btn-primary" id="modal-nivel-btn-guardar">
+            <span id="modal-nivel-spinner" class="inv-spinner" style="display: none;"></span>
+            <span>GUARDAR CATEGORÍA</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script src="js/app.js?v=6"></script>
+  <!-- 2. MODAL REGISTRAR / EDITAR CLIENTE -->
+  <div class="inv-modal-overlay" id="modal-cliente-form">
+    <div class="inv-modal-card" style="max-width: 600px;">
+      <div class="inv-modal-header">
+        <h3 id="modal-cliente-title" style="display: flex; align-items: center; gap: 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-gold);"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+          <span id="modal-cliente-title-text">REGISTRAR CLIENTE</span>
+        </h3>
+        <button class="close-btn" id="modal-cliente-btn-cerrar">&times;</button>
+      </div>
+      <form id="form-cliente-registro">
+        <input type="hidden" id="cliente-form-id">
+        <div class="inv-modal-body">
+          <div class="inv-form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="inv-form-group" style="flex: 2;">
+              <label class="inv-form-label">Nombre y Apellido <span style="color: #ef4444;">*</span></label>
+              <input type="text" id="cliente-form-nombre" class="inv-form-input" placeholder="Nombre completo del cliente" required>
+            </div>
+            <div class="inv-form-group" style="flex: 1;">
+              <label class="inv-form-label">Cédula / Documento</label>
+              <input type="text" id="cliente-form-documento" class="inv-form-input" placeholder="V-00.000.000 / Pasaporte">
+            </div>
+          </div>
+
+          <div class="inv-form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+            <div class="inv-form-group" style="flex: 1;">
+              <label class="inv-form-label">Teléfono de Contacto</label>
+              <input type="tel" id="cliente-form-telefono" class="inv-form-input" placeholder="+58 414-0000000">
+            </div>
+            <div class="inv-form-group" style="flex: 1;">
+              <label class="inv-form-label">Correo Electrónico</label>
+              <input type="email" id="cliente-form-correo" class="inv-form-input" placeholder="cliente@correo.com">
+            </div>
+          </div>
+
+          <div class="inv-form-group" style="margin-bottom: 15px;">
+            <label class="inv-form-label">Nivel Especial Asignado (Categoría VIP)</label>
+            <select id="cliente-form-nivel-id" class="inv-form-select">
+              <option value="">-- Sin Nivel Especial (Cliente Estándar) --</option>
+              <!-- Opciones pobladas dinámicamente -->
+            </select>
+          </div>
+
+          <div class="inv-form-group" style="margin-bottom: 5px;">
+            <label class="inv-form-label">Notas / Preferencias de Estancia</label>
+            <textarea id="cliente-form-notas" class="inv-form-textarea" rows="2" placeholder="ej: Alérgico a plumas, prefiere habitaciones piso alto con vista este."></textarea>
+          </div>
+        </div>
+        <div class="inv-modal-footer">
+          <button type="button" class="inv-btn-secondary" id="modal-cliente-btn-cancelar">Cancelar</button>
+          <button type="submit" class="inv-btn-primary" id="modal-cliente-btn-guardar">
+            <span id="modal-cliente-spinner" class="inv-spinner" style="display: none;"></span>
+            <span>GUARDAR CLIENTE</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. MODAL DOBLE CONFIRMACIÓN: ELIMINAR NIVEL (Regla 3 de AGENTS.md) -->
+  <div class="inv-modal-overlay" id="modal-del-nivel">
+    <div class="inv-modal-card" style="max-width: 500px; border-color: rgba(208, 58, 69, 0.4);">
+      <div class="inv-modal-header" style="background: rgba(208, 58, 69, 0.1);">
+        <h3 style="color: var(--color-occupied); display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          ELIMINAR NIVEL ESPECIAL
+        </h3>
+        <button class="close-btn" id="modal-del-nivel-btn-cerrar">&times;</button>
+      </div>
+      <div class="inv-modal-body">
+        <p style="font-size: 13px; color: var(--text-active); margin-bottom: 12px;">
+          ¿Está seguro de que desea eliminar la categoría especial <strong id="modal-del-nivel-nombre" style="color: var(--text-gold);"></strong>?
+        </p>
+
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; margin-bottom: 15px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+            Descuento asociado: <strong id="modal-del-nivel-desc" style="color: var(--text-active);"></strong>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Clientes asignados: <strong id="modal-del-nivel-clientes" style="color: var(--text-active);"></strong>
+          </div>
+          <div style="font-size: 11px; color: #f59e0b; margin-top: 8px;">
+            Nota: Los clientes que tengan asignada esta categoría no serán borrados, pero perderán esta etiqueta y sus beneficios.
+          </div>
+        </div>
+
+        <div id="modal-del-nivel-paso1" style="display: block;">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+            Paso 1 de 2: Para continuar, confirme que comprende que la eliminación de esta categoría no podrá ser deshecha.
+          </p>
+        </div>
+
+        <div id="modal-del-nivel-paso2" style="display: none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid var(--border-gold);">
+          <p style="font-size: 13px; color: var(--text-gold); font-weight: 600; margin: 0;">
+            Paso 2 de 2: Doble confirmación requerida. Haga clic en "ELIMINAR DEFINITIVAMENTE" para borrar la categoría.
+          </p>
+        </div>
+      </div>
+      <div class="inv-modal-footer">
+        <button type="button" class="inv-btn-secondary" id="modal-del-nivel-btn-cancelar">Cancelar</button>
+        <button type="button" class="inv-btn-primary" id="modal-del-nivel-btn-paso1" style="background: var(--color-occupied); color: white;">
+          SÍ, DESEO CONTINUAR
+        </button>
+        <button type="button" class="inv-btn-primary" id="modal-del-nivel-btn-definitivo" style="display: none; background: #b00020; color: white;">
+          <span id="modal-del-nivel-spinner" class="inv-spinner" style="display: none;"></span>
+          <span>ELIMINAR DEFINITIVAMENTE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL DOBLE CONFIRMACIÓN: ELIMINAR CLIENTE (Regla 3 de AGENTS.md) -->
+  <div class="inv-modal-overlay" id="modal-del-cliente">
+    <div class="inv-modal-card" style="max-width: 500px; border-color: rgba(208, 58, 69, 0.4);">
+      <div class="inv-modal-header" style="background: rgba(208, 58, 69, 0.1);">
+        <h3 style="color: var(--color-occupied); display: flex; align-items: center; gap: 8px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          ELIMINAR CLIENTE DEL DIRECTORIO
+        </h3>
+        <button class="close-btn" id="modal-del-cliente-btn-cerrar">&times;</button>
+      </div>
+      <div class="inv-modal-body">
+        <p style="font-size: 13px; color: var(--text-active); margin-bottom: 12px;">
+          ¿Está seguro de que desea eliminar la ficha del cliente <strong id="modal-del-cliente-nombre" style="color: var(--text-gold);"></strong>?
+        </p>
+
+        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 12px; margin-bottom: 15px;">
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+            Documento: <strong id="modal-del-cliente-doc" style="color: var(--text-active);"></strong>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted);">
+            Nivel asignado: <strong id="modal-del-cliente-nivel" style="color: var(--text-active);"></strong>
+          </div>
+        </div>
+
+        <div id="modal-del-cliente-paso1" style="display: block;">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;">
+            Paso 1 de 2: Para continuar, confirme que desea eliminar permanentemente este registro de cliente.
+          </p>
+        </div>
+
+        <div id="modal-del-cliente-paso2" style="display: none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid var(--border-gold);">
+          <p style="font-size: 13px; color: var(--text-gold); font-weight: 600; margin: 0;">
+            Paso 2 de 2: Doble confirmación requerida. Haga clic en "ELIMINAR DEFINITIVAMENTE" para borrar el registro.
+          </p>
+        </div>
+      </div>
+      <div class="inv-modal-footer">
+        <button type="button" class="inv-btn-secondary" id="modal-del-cliente-btn-cancelar">Cancelar</button>
+        <button type="button" class="inv-btn-primary" id="modal-del-cliente-btn-paso1" style="background: var(--color-occupied); color: white;">
+          SÍ, DESEO CONTINUAR
+        </button>
+        <button type="button" class="inv-btn-primary" id="modal-del-cliente-btn-definitivo" style="display: none; background: #b00020; color: white;">
+          <span id="modal-del-cliente-spinner" class="inv-spinner" style="display: none;"></span>
+          <span>ELIMINAR DEFINITIVAMENTE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

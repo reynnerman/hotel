@@ -177,6 +177,138 @@ async function sembrarInventarioInicial() {
   }
 }
 
+// Migración y datos iniciales para niveles especiales y clientes
+async function initNivelesTable() {
+  const tableSql = isPostgres
+    ? `
+      CREATE TABLE IF NOT EXISTS niveles_especiales (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        descuento_porcentaje NUMERIC(5,2) DEFAULT 0,
+        beneficios TEXT,
+        color VARCHAR(50) DEFAULT 'gold',
+        descripcion TEXT,
+        activo INT DEFAULT 1,
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS clientes (
+        id SERIAL PRIMARY KEY,
+        nombre VARCHAR(150) NOT NULL,
+        documento VARCHAR(50),
+        telefono VARCHAR(50),
+        correo VARCHAR(100),
+        nivel_id INT,
+        notas TEXT,
+        fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `
+    : `
+      CREATE TABLE IF NOT EXISTS niveles_especiales (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        descuento_porcentaje REAL DEFAULT 0,
+        beneficios TEXT,
+        color TEXT DEFAULT 'gold',
+        descripcion TEXT,
+        activo INTEGER DEFAULT 1,
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE TABLE IF NOT EXISTS clientes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        documento TEXT,
+        telefono TEXT,
+        correo TEXT,
+        nivel_id INTEGER,
+        notas TEXT,
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+  if (isPostgres) {
+    await pool.query(tableSql);
+    const resCount = await pool.query('SELECT COUNT(*) as c FROM niveles_especiales');
+    if (parseInt(resCount.rows[0].c, 10) === 0) {
+      await sembrarNivelesIniciales();
+    }
+  } else {
+    sqliteDb.exec(tableSql);
+    const countRow = sqliteDb.prepare('SELECT COUNT(*) as c FROM niveles_especiales').get();
+    if (Number(countRow.c) === 0) {
+      await sembrarNivelesIniciales();
+    }
+  }
+}
+
+// Sembrado de niveles especiales por defecto (VIP 1, VIP 2, VIP 3) y clientes iniciales
+async function sembrarNivelesIniciales() {
+  const niveles = [
+    {
+      nombre: 'VIP 1',
+      descuento_porcentaje: 10.0,
+      beneficios: 'Descuento del 10% en reservas, Prioridad en Early Check-in según disponibilidad, Bebida de bienvenida en recepción',
+      color: 'blue',
+      descripcion: 'Huéspedes habituales con estancias recurrentes'
+    },
+    {
+      nombre: 'VIP 2',
+      descuento_porcentaje: 15.0,
+      beneficios: 'Descuento del 15% en reservas, Late Check-out garantizado hasta las 14:00, Desayuno buffet continental incluido, Botella de vino en habitación',
+      color: 'gold',
+      descripcion: 'Miembros preferenciales y clientes corporativos frecuentes'
+    },
+    {
+      nombre: 'VIP 3',
+      descuento_porcentaje: 25.0,
+      beneficios: 'Descuento del 25% en reservas, Acceso ilimitado al Lounge VIP & Spa, Servicio de mayordomo y traslados ejecutivos, Champaña y cesta gourmet en suite, Late Check-out hasta las 16:00',
+      color: 'purple',
+      descripcion: 'Máxima categoría honorífica para personalidades y clientes exclusivos'
+    }
+  ];
+
+  for (const n of niveles) {
+    await db.run(
+      'INSERT INTO niveles_especiales (nombre, descuento_porcentaje, beneficios, color, descripcion, activo) VALUES (?, ?, ?, ?, ?, 1)',
+      [n.nombre, n.descuento_porcentaje, n.beneficios, n.color, n.descripcion]
+    );
+  }
+
+  // Clientes asignados a niveles
+  const clientes = [
+    {
+      nombre: 'Alejandro Morales',
+      documento: 'V-18.452.910',
+      telefono: '+58 414-5551234',
+      correo: 'amorales@corporativo.com',
+      nivel_id: 1,
+      notas: 'Cliente corporativo frecuente de fines de semana'
+    },
+    {
+      nombre: 'Valeria Mendoza',
+      documento: 'V-15.820.301',
+      telefono: '+58 412-9988776',
+      correo: 'valeria.mendoza@empresa.com',
+      nivel_id: 2,
+      notas: 'Prefiere habitaciones piso alto con vista a la piscina'
+    },
+    {
+      nombre: 'Dr. Roberto De Sola',
+      documento: 'V-08.125.443',
+      telefono: '+58 424-7776655',
+      correo: 'roberto.desola@medicos.org',
+      nivel_id: 3,
+      notas: 'Huésped distinguido, requiere atención ejecutiva y suite presidencial'
+    }
+  ];
+
+  for (const c of clientes) {
+    await db.run(
+      'INSERT INTO clientes (nombre, documento, telefono, correo, nivel_id, notas) VALUES (?, ?, ?, ?, ?, ?)',
+      [c.nombre, c.documento, c.telefono, c.correo, c.nivel_id, c.notas]
+    );
+  }
+}
+
 async function setupDatabase() {
   if (pool) {
     try {
@@ -184,6 +316,7 @@ async function setupDatabase() {
       isPostgres = true;
       console.log('¡Conectado exitosamente a PostgreSQL (Supabase / Seenode)!');
       await initInventoryTable();
+      await initNivelesTable();
       return;
     } catch (error) {
       console.warn('Aviso: No se pudo conectar a PostgreSQL en la nube (' + error.message + ').');
@@ -199,6 +332,7 @@ async function setupDatabase() {
     isPostgres = false;
     console.log('¡Conectado exitosamente a la base de datos local SQLite (hotel.sqlite)!');
     await initInventoryTable();
+    await initNivelesTable();
   } catch (sqliteErr) {
     console.error('Error fatal: No se pudo inicializar ninguna base de datos.', sqliteErr);
     throw sqliteErr;

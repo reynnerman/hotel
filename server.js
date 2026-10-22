@@ -854,6 +854,248 @@ app.delete('/api/inventario/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// ----------------------------------------------------
+// ENDPOINTS DE NIVELES ESPECIALES (VIP) Y CLIENTES
+// ----------------------------------------------------
+
+// Listar todos los niveles especiales con contador de clientes
+app.get('/api/niveles', authenticateToken, async (req, res) => {
+  try {
+    const db = await getDb();
+    const niveles = await db.all(`
+      SELECT n.*, 
+        (SELECT COUNT(*) FROM clientes c WHERE c.nivel_id = n.id) as total_clientes
+      FROM niveles_especiales n
+      ORDER BY n.descuento_porcentaje ASC, n.id ASC
+    `);
+    res.json(niveles);
+  } catch (error) {
+    console.error('Error al obtener niveles especiales:', error);
+    res.status(500).json({ error: 'Error al obtener los niveles especiales.' });
+  }
+});
+
+// Crear nuevo nivel especial
+app.post('/api/niveles', authenticateToken, async (req, res) => {
+  try {
+    const { nombre, descuento_porcentaje, beneficios, color, descripcion, activo } = req.body;
+    if (!nombre || nombre.trim() === '') {
+      return res.status(400).json({ error: 'El nombre o etiqueta del nivel es requerido.' });
+    }
+
+    const descuento = parseFloat(descuento_porcentaje) || 0;
+    const colorNivel = color ? color.trim().toLowerCase() : 'gold';
+    const estadoActivo = activo !== undefined ? (activo ? 1 : 0) : 1;
+
+    const db = await getDb();
+    await db.run(`
+      INSERT INTO niveles_especiales (nombre, descuento_porcentaje, beneficios, color, descripcion, activo)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [nombre.trim(), descuento, beneficios ? beneficios.trim() : '', colorNivel, descripcion ? descripcion.trim() : '', estadoActivo]);
+
+    const nuevoNivel = await db.get('SELECT * FROM niveles_especiales WHERE nombre = ? ORDER BY id DESC LIMIT 1', [nombre.trim()]);
+    res.json({ message: 'Nivel especial creado exitosamente.', nivel: nuevoNivel });
+  } catch (error) {
+    console.error('Error al crear nivel especial:', error);
+    res.status(500).json({ error: 'Error al registrar el nivel especial.' });
+  }
+});
+
+// Modificar nivel especial
+app.put('/api/niveles/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, descuento_porcentaje, beneficios, color, descripcion, activo } = req.body;
+
+    const db = await getDb();
+    const nivelExistente = await db.get('SELECT * FROM niveles_especiales WHERE id = ?', [id]);
+    if (!nivelExistente) {
+      return res.status(404).json({ error: 'Nivel especial no encontrado.' });
+    }
+
+    const nuevoNombre = nombre !== undefined ? nombre.trim() : nivelExistente.nombre;
+    const nuevoDesc = descuento_porcentaje !== undefined ? parseFloat(descuento_porcentaje) : nivelExistente.descuento_porcentaje;
+    const nuevosBeneficios = beneficios !== undefined ? beneficios.trim() : nivelExistente.beneficios;
+    const nuevoColor = color !== undefined ? color.trim().toLowerCase() : nivelExistente.color;
+    const nuevaDesc = descripcion !== undefined ? descripcion.trim() : nivelExistente.descripcion;
+    const nuevoActivo = activo !== undefined ? (activo ? 1 : 0) : nivelExistente.activo;
+
+    await db.run(`
+      UPDATE niveles_especiales
+      SET nombre = ?, descuento_porcentaje = ?, beneficios = ?, color = ?, descripcion = ?, activo = ?
+      WHERE id = ?
+    `, [nuevoNombre, nuevoDesc, nuevosBeneficios, nuevoColor, nuevaDesc, nuevoActivo, id]);
+
+    const nivelActualizado = await db.get('SELECT * FROM niveles_especiales WHERE id = ?', [id]);
+    res.json({ message: 'Nivel especial actualizado correctamente.', nivel: nivelActualizado });
+  } catch (error) {
+    console.error('Error al actualizar nivel especial:', error);
+    res.status(500).json({ error: 'Error al actualizar el nivel especial.' });
+  }
+});
+
+// Eliminar nivel especial
+app.delete('/api/niveles/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = await getDb();
+    const nivel = await db.get('SELECT * FROM niveles_especiales WHERE id = ?', [id]);
+    if (!nivel) {
+      return res.status(404).json({ error: 'Nivel especial no encontrado.' });
+    }
+
+    // Desvincular clientes que tengan este nivel antes de eliminar
+    await db.run('UPDATE clientes SET nivel_id = NULL WHERE nivel_id = ?', [id]);
+    await db.run('DELETE FROM niveles_especiales WHERE id = ?', [id]);
+
+    res.json({ message: `Nivel especial "${nivel.nombre}" eliminado correctamente.` });
+  } catch (error) {
+    console.error('Error al eliminar nivel especial:', error);
+    res.status(500).json({ error: 'Error al eliminar el nivel especial.' });
+  }
+});
+
+// Listar clientes y su nivel asignado con soporte de búsqueda
+app.get('/api/clientes', authenticateToken, async (req, res) => {
+  try {
+    const { q, nivel_id } = req.query;
+    const db = await getDb();
+
+    let sql = `
+      SELECT c.*, 
+        n.nombre as nivel_nombre, 
+        n.descuento_porcentaje as nivel_descuento, 
+        n.beneficios as nivel_beneficios, 
+        n.color as nivel_color
+      FROM clientes c
+      LEFT JOIN niveles_especiales n ON c.nivel_id = n.id
+    `;
+    const params = [];
+    const conditions = [];
+
+    if (nivel_id && nivel_id !== 'todos') {
+      if (nivel_id === 'sin_nivel') {
+        conditions.push('c.nivel_id IS NULL');
+      } else {
+        conditions.push('c.nivel_id = ?');
+        params.push(parseInt(nivel_id, 10));
+      }
+    }
+
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    sql += ' ORDER BY c.id DESC';
+    let clientes = await db.all(sql, params);
+
+    // Filtro por palabra clave
+    if (q && q.trim() !== '') {
+      const busqueda = q.trim().toLowerCase();
+      clientes = clientes.filter(c => {
+        const nom = (c.nombre || '').toLowerCase();
+        const doc = (c.documento || '').toLowerCase();
+        const tel = (c.telefono || '').toLowerCase();
+        const cor = (c.correo || '').toLowerCase();
+        const niv = (c.nivel_nombre || '').toLowerCase();
+        return nom.includes(busqueda) || doc.includes(busqueda) || tel.includes(busqueda) || cor.includes(busqueda) || niv.includes(busqueda);
+      });
+    }
+
+    res.json(clientes);
+  } catch (error) {
+    console.error('Error al listar clientes:', error);
+    res.status(500).json({ error: 'Error al obtener el directorio de clientes.' });
+  }
+});
+
+// Registrar nuevo cliente o asignarle un nivel
+app.post('/api/clientes', authenticateToken, async (req, res) => {
+  try {
+    const { nombre, documento, telefono, correo, nivel_id, notas } = req.body;
+    if (!nombre || nombre.trim() === '') {
+      return res.status(400).json({ error: 'El nombre del cliente es requerido.' });
+    }
+
+    const db = await getDb();
+    const nivelId = nivel_id ? parseInt(nivel_id, 10) : null;
+
+    await db.run(`
+      INSERT INTO clientes (nombre, documento, telefono, correo, nivel_id, notas)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [nombre.trim(), documento ? documento.trim() : '', telefono ? telefono.trim() : '', correo ? correo.trim() : '', nivelId, notas ? notas.trim() : '']);
+
+    const nuevoCliente = await db.get(`
+      SELECT c.*, n.nombre as nivel_nombre, n.descuento_porcentaje as nivel_descuento, n.beneficios as nivel_beneficios, n.color as nivel_color
+      FROM clientes c
+      LEFT JOIN niveles_especiales n ON c.nivel_id = n.id
+      WHERE c.nombre = ? ORDER BY c.id DESC LIMIT 1
+    `, [nombre.trim()]);
+
+    res.json({ message: 'Cliente registrado exitosamente.', cliente: nuevoCliente });
+  } catch (error) {
+    console.error('Error al crear cliente:', error);
+    res.status(500).json({ error: 'Error al registrar el cliente.' });
+  }
+});
+
+// Modificar cliente o reasignar nivel
+app.put('/api/clientes/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, documento, telefono, correo, nivel_id, notas } = req.body;
+
+    const db = await getDb();
+    const clienteExistente = await db.get('SELECT * FROM clientes WHERE id = ?', [id]);
+    if (!clienteExistente) {
+      return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+
+    const nuevoNombre = nombre !== undefined ? nombre.trim() : clienteExistente.nombre;
+    const nuevoDoc = documento !== undefined ? documento.trim() : clienteExistente.documento;
+    const nuevoTel = telefono !== undefined ? telefono.trim() : clienteExistente.telefono;
+    const nuevoCor = correo !== undefined ? correo.trim() : clienteExistente.correo;
+    const nuevoNivel = nivel_id !== undefined ? (nivel_id ? parseInt(nivel_id, 10) : null) : clienteExistente.nivel_id;
+    const nuevasNotas = notas !== undefined ? notas.trim() : clienteExistente.notas;
+
+    await db.run(`
+      UPDATE clientes
+      SET nombre = ?, documento = ?, telefono = ?, correo = ?, nivel_id = ?, notas = ?
+      WHERE id = ?
+    `, [nuevoNombre, nuevoDoc, nuevoTel, nuevoCor, nuevoNivel, nuevasNotas, id]);
+
+    const clienteActualizado = await db.get(`
+      SELECT c.*, n.nombre as nivel_nombre, n.descuento_porcentaje as nivel_descuento, n.beneficios as nivel_beneficios, n.color as nivel_color
+      FROM clientes c
+      LEFT JOIN niveles_especiales n ON c.nivel_id = n.id
+      WHERE c.id = ?
+    `, [id]);
+
+    res.json({ message: 'Cliente actualizado exitosamente.', cliente: clienteActualizado });
+  } catch (error) {
+    console.error('Error al actualizar cliente:', error);
+    res.status(500).json({ error: 'Error al actualizar datos del cliente.' });
+  }
+});
+
+// Eliminar cliente
+app.delete('/api/clientes/:id', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const db = await getDb();
+    const cliente = await db.get('SELECT * FROM clientes WHERE id = ?', [id]);
+    if (!cliente) {
+      return res.status(404).json({ error: 'Cliente no encontrado.' });
+    }
+
+    await db.run('DELETE FROM clientes WHERE id = ?', [id]);
+    res.json({ message: `Cliente "${cliente.nombre}" eliminado correctamente.` });
+  } catch (error) {
+    console.error('Error al eliminar cliente:', error);
+    res.status(500).json({ error: 'Error al eliminar cliente.' });
+  }
+});
+
 // Servir la interfaz frontend en cualquier otra ruta
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
