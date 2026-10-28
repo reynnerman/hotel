@@ -30,22 +30,34 @@ function authenticateToken(req, res, next) {
 // ----------------------------------------------------
 app.post('/api/login', async (req, res) => {
   try {
-    const { usuario, password } = req.body;
+    let { usuario, password } = req.body;
+    usuario = typeof usuario === 'string' ? usuario.trim() : '';
+    password = typeof password === 'string' ? password.trim() : '';
+
+    if (!usuario || !password) {
+      return res.status(400).json({ error: 'Usuario y contraseña son requeridos.' });
+    }
+
     const db = await getDb();
     
-    // Buscar usuario incluyendo su rol y permisos
+    // Buscar usuario incluyendo su rol y permisos, ignorando espacios
     const user = await db.get(`
       SELECT u.*, r.nombre as rol_nombre 
       FROM usuarios u 
       JOIN roles r ON u.rol_id = r.id 
-      WHERE u.usuario = ?
-    `, [usuario]);
+      WHERE TRIM(u.usuario) = ? OR u.usuario = ?
+    `, [usuario, usuario]);
 
     if (!user) {
       return res.status(400).json({ error: 'Usuario no encontrado.' });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    let validPassword = await bcrypt.compare(password, user.password);
+    // En caso de que la contraseña en la base de datos se hubiera registrado con espacios originales
+    if (!validPassword && req.body.password && req.body.password !== password) {
+      validPassword = await bcrypt.compare(req.body.password, user.password);
+    }
+
     if (!validPassword) {
       return res.status(400).json({ error: 'Contraseña incorrecta.' });
     }
@@ -98,11 +110,18 @@ app.post('/api/usuarios', authenticateToken, async (req, res) => {
     if (!req.user.permisos.includes('GESTIONAR_USUARIOS')) {
       return res.status(403).json({ error: 'No tienes permisos para gestionar usuarios.' });
     }
-    const { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
+    let { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
+    cedula = typeof cedula === 'string' ? cedula.trim() : cedula;
+    usuario = typeof usuario === 'string' ? usuario.trim() : usuario;
+    nombre = typeof nombre === 'string' ? nombre.trim() : nombre;
+    apellido = typeof apellido === 'string' ? apellido.trim() : apellido;
+    telefono = typeof telefono === 'string' ? telefono.trim() : telefono;
+    password = typeof password === 'string' ? password.trim() : password;
+
     const db = await getDb();
     
     // Check if user already exists
-    const exists = await db.get('SELECT * FROM usuarios WHERE usuario = ? OR cedula = ?', [usuario, cedula]);
+    const exists = await db.get('SELECT * FROM usuarios WHERE TRIM(usuario) = ? OR TRIM(cedula) = ?', [usuario, cedula]);
     if (exists) return res.status(400).json({ error: 'El usuario o la cédula ya existe.' });
 
     const hashed = bcrypt.hashSync(password, 10);
@@ -122,7 +141,16 @@ app.put('/api/usuarios/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'No tienes permisos para gestionar usuarios.' });
     }
     const { id } = req.params;
-    const { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
+    let { cedula, usuario, nombre, apellido, telefono, password, rol_id } = req.body;
+    cedula = typeof cedula === 'string' ? cedula.trim() : cedula;
+    usuario = typeof usuario === 'string' ? usuario.trim() : usuario;
+    nombre = typeof nombre === 'string' ? nombre.trim() : nombre;
+    apellido = typeof apellido === 'string' ? apellido.trim() : apellido;
+    telefono = typeof telefono === 'string' ? telefono.trim() : telefono;
+    if (password) {
+      password = typeof password === 'string' ? password.trim() : password;
+    }
+
     const db = await getDb();
 
     if (password) {

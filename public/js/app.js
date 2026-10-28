@@ -950,7 +950,7 @@ async function manejarCreacionUsuario(e) {
     usuario: document.getElementById('nu-usuario').value.trim(),
     nombre: document.getElementById('nu-nombre').value.trim(),
     apellido: document.getElementById('nu-apellido').value.trim(),
-    password: document.getElementById('nu-password').value,
+    password: document.getElementById('nu-password').value.trim(),
     rol_id: parseInt(document.getElementById('nu-rol').value, 10)
   };
 
@@ -1410,7 +1410,7 @@ async function manejarEditarUsuario(e) {
     usuario: document.getElementById('edit-user-usuario').value.trim(),
     nombre: document.getElementById('edit-user-nombre').value.trim(),
     apellido: document.getElementById('edit-user-apellido').value.trim(),
-    password: document.getElementById('edit-user-password').value,
+    password: document.getElementById('edit-user-password').value.trim(),
     rol_id: parseInt(document.getElementById('edit-user-rol').value, 10)
   };
 
@@ -1463,7 +1463,7 @@ async function manejarCrearUsuarioAjustes(e) {
     nombre: document.getElementById('snu-nombre').value.trim(),
     apellido: document.getElementById('snu-apellido').value.trim(),
     telefono: document.getElementById('snu-telefono').value.trim(),
-    password: document.getElementById('snu-password').value,
+    password: document.getElementById('snu-password').value.trim(),
     rol_id: parseInt(document.getElementById('snu-rol').value, 10)
   };
 

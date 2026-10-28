@@ -464,10 +464,15 @@
     // ── Formulario de login ───────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const user    = document.getElementById('username').value;
-      const pass    = document.getElementById('password').value;
+      const user    = (document.getElementById('username').value || '').trim();
+      const pass    = (document.getElementById('password').value || '').trim();
       const errDiv  = document.getElementById('login-error');
       const btn     = document.getElementById('login-submit-btn');
+
+      if (!user || !pass) {
+        errDiv.textContent = 'Por favor complete todos los campos.';
+        return;
+      }
 
       btn.disabled = true;
       btn.textContent = 'VERIFICANDO...';
